@@ -11,14 +11,19 @@ app.get('/telegram', (req, res) => {
   let whale = 'No recent whale moves';
   let chartPoints = [108000,109500,108200,111000,110500,113000,115000,117000,119000,122000,125000,128000];
 
+  // Fallback — no crash if API fails
   try {
-    const response = fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
-    const data = response.then(r => r.json());
-    price = '$' + Number(data.bitcoin.usd).toLocaleString();
-    const ch = data.bitcoin.usd_24h_change.toFixed(2);
-    change = ch > 0 ? 'Up + ' + ch + '%' : 'Down ' + Math.abs(ch) + '%';
+    fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true')
+      .then(r => r.json())
+      .then(d => {
+        if (d.bitcoin) {
+          price = '$' + Number(d.bitcoin.usd).toLocaleString();
+          const ch = d.bitcoin.usd_24h_change.toFixed(2);
+          change = ch > 0 ? 'Up + ' + ch + '%' : 'Down ' + Math.abs(ch) + '%';
+        }
+      });
   } catch (e) {
-    // Fallback — no crash
+    // Fallback — app always loads
   }
 
   res.send(
@@ -55,7 +60,7 @@ ctx.lineWidth = 8;
 ctx.beginPath();
 ctx.moveTo(0, 250);
 const points = ;
-for(let i = 1; i < points.length; i++) {
+for (let i = 1; i < points.length; i++) {
   ctx.lineTo(i * (600 / points.length), 280 - ((points[i] - Math.min(...points)) / (Math.max(...points) - Math.min(...points)) * 280));
 }
 ctx.stroke();
@@ -69,5 +74,5 @@ ctx.fill();
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('Server running on port ' + PORT);
+  console.log('Crypto Alpha Pro LIVE on Render!');
 });
