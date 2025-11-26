@@ -17,20 +17,9 @@ app.get("/telegram", async (req,res)=>{
     }
   } catch(e) {}
 
-  if (price === 108420) {
-    try {
-      const r = await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT");
-      if (r.ok) {
-        const j = await r.json();
-        price = parseFloat(j.lastPrice);
-        change = ((j.lastPrice - j.openPrice)/j.openPrice*100).toFixed(2);
-      }
-    } catch(e) {}
-  }
-
   price = "$" + Number(price).toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:0});
   color = parseFloat(change) >= 0 ? "#0f0" : "#f66";
-  if (parseFloat(change) >= 0 && change !== "+6.9") change = "+" + change;
+  if (parseFloat(change) >= 0) change = "+" + change;
 
   res.send(`
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -38,59 +27,59 @@ app.get("/telegram", async (req,res)=>{
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 body{margin:0;background:#000;color:#0f0;font-family:monospace;text-align:center;padding:20px;overflow-x:hidden}
-h1{color:#0ff;font-size:3em;margin:10px}
-.p{font-size:6.2em;color:#0ff;margin:5px}
-canvas{width:96vw;max-width:720px;height:380px;border:10px solid #0f0;border-radius:35px;margin:40px auto;background:#000;
-       box-shadow:0 0 60px #0f0, 0 0 100px #0f0, inset 0 0 80px #0f0}
-.box{background:#001a00;padding:24px;border:6px solid #0f0;border-radius:30px;margin:25px auto;max-width:650px;font-size:1.8em;box-shadow:0 0 30px #0f0}
-.btn{background:#0f0;color:#000;padding:25px 80px;border-radius:70px;font-size:2.4em;font-weight:bold;text-decoration:none;display:inline-block;margin:40px;box-shadow:0 0 50px #0f0}
-.ai{font-size:1.7em;color:#0ff;padding:20px;background:#000;border:4px dashed #0f0;border-radius:25px;margin:20px}
+h1{color:#0ff;font-size:3em}
+.p{font-size:6.5em;color:#0ff;margin:5px}
+canvas{display:block;width:96vw;max-width:750px;height:420px;margin:40px auto;border:12px solid #0f0;border-radius:40px;background:#000;
+       box-shadow:0 0 80px #0f0, 0 0 120px #0f0, inset 0 0 100px #0f0}
+.box{background:#001a00;padding:25px;border:6px solid #0f0;border-radius:35px;margin:25px auto;max-width:700px;font-size:1.9em;box-shadow:0 0 40px #0f0}
+.btn{background:#0f0;color:#000;padding:28px 90px;border-radius:80px;font-size:2.6em;font-weight:bold;text-decoration:none;display:inline-block;margin:45px;box-shadow:0 0 60px #0f0}
 </style>
 </head>
 <body onload="Telegram.WebApp.ready();Telegram.WebApp.expand()">
 <h1>CRYPTO ALPHA PRO</h1>
 <div class="p">${price}</div>
-<div style="font-size:3.2em;color:${color};margin:10px">24h ${change}%</div>
+<div style="font-size:3.5em;color:${color}">24h ${change}%</div>
 
 <canvas id="c"></canvas>
 
 <div class="box">WHALE ALERT ? $42.7M BTC ? Binance (3 min ago)</div>
-<div class="box ai">AI TRACKER ? Next pump in 4h 21m<br>Confidence: 89% • Target: $112,000+</div>
-<div class="box">WALLET TRACKER ? 7 whales accumulated 842 BTC in last 6h</div>
+<div class="box">AI TRACKER ? Next pump in 4h 21m • Target: $112,000+</div>
+<div class="box">WALLET TRACKER ? 7 whales bought 842 BTC in last 6h</div>
 
-<a href="https://t.me/CryptoBot?start=pay_to_@crypto_alert_677_bot" class="btn">
-UNLOCK PREMIUM ? $9/month
-</a>
+<a href="https://t.me/CryptoBot?start=pay_to_@crypto_alert_677_bot" class="btn">UNLOCK PREMIUM ? $9/month</a>
 
-<div style="font-size:2.2em;color:#0ff;margin:60px">Next leg up loading...</div>
+<div style="font-size:2.3em;color:#0ff;margin:70px">Next leg up loading...</div>
 
 <script>
-// ULTRA MASSIVE GLOWING CHART
+// THIS IS THE GRAPH THAT CANNOT BE KILLED
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
-canvas.width = 720;
-canvas.height = 380;
+
+// FORCE EXACT PIXEL SIZE — THIS IS THE KEY
+canvas.width = 750;
+canvas.height = 420;
 
 ctx.fillStyle = "#000";
-ctx.fillRect(0, 0, 720, 380);
+ctx.fillRect(0, 0, 750, 420);
 
 ctx.strokeStyle = "#0f0";
-ctx.lineWidth = 16;
-ctx.shadowBlur = 50;
+ctx.lineWidth = 20;
+ctx.shadowBlur = 60;
 ctx.shadowColor = "#0f0";
 
 ctx.beginPath();
-ctx.moveTo(60, 340);
-const points = [340,310,280,295,240,190,150,110,85,60,35,20];
-points.forEach((y,i) => ctx.lineTo(60 + i*55, y));
+ctx.moveTo(80, 380);
+const yPoints = [380, 340, 300, 320, 260, 200, 150, 100, 70, 45, 25, 15];
+yPoints.forEach((y, i) => ctx.lineTo(80 + i * 58, y));
 ctx.stroke();
 
-ctx.fillStyle = "rgba(0,255,0,0.5)";
-ctx.lineTo(680, 380);
-ctx.lineTo(60, 380);
+// Fill under the line
+ctx.lineTo(720, 420);
+ctx.lineTo(80, 420);
+ctx.fillStyle = "rgba(0, 255, 0, 0.55)";
 ctx.fill();
 </script>
 </body></html>`);
 });
 
-app.listen(process.env.PORT || 10000, "0.0.0.0");
+app.listen(process.env.PORT || 10000, "0.0.0.0", () => console.log("GRAPH IS ALIVE"));
