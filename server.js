@@ -8,7 +8,6 @@ app.get("/telegram", async (req,res)=>{
   let change = "+6.9";
   let color = "#0f0";
 
-  // TRY COINGECKO
   try {
     const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true");
     if (r.ok) {
@@ -18,7 +17,6 @@ app.get("/telegram", async (req,res)=>{
     }
   } catch(e) {}
 
-  // IF STILL FALLBACK ? TRY BINANCE
   if (price === 108420) {
     try {
       const r = await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT");
@@ -26,17 +24,6 @@ app.get("/telegram", async (req,res)=>{
         const j = await r.json();
         price = parseFloat(j.lastPrice);
         change = ((j.lastPrice - j.openPrice)/j.openPrice*100).toFixed(2);
-      }
-    } catch(e) {}
-  }
-
-  // FINAL FALLBACK ? KRaken
-  if (price === 108420) {
-    try {
-      const r = await fetch("https://api.kraken.com/0/public/Ticker?pair=XBTUSD");
-      if (r.ok) {
-        const j = await r.json();
-        price = parseFloat(j.result.XXBTZUSD.c[0]);
       }
     } catch(e) {}
   }
@@ -52,39 +39,56 @@ app.get("/telegram", async (req,res)=>{
 <style>
 body{margin:0;background:#000;color:#0f0;font-family:monospace;text-align:center;padding:20px;overflow-x:hidden}
 h1{color:#0ff;font-size:3em;margin:10px}
-.p{font-size:6em;color:#0ff;margin:5px}
-canvas{width:95vw;max-width:680px;height:340px;border:8px solid #0f0;border-radius:30px;margin:35px auto;background:#000;box-shadow:0 0 40px #0f0, inset 0 0 40px #0f0}
-.box{background:#001a00;padding:22px;border:5px solid #0f0;border-radius:28px;margin:22px auto;max-width:600px;font-size:1.7em;box-shadow:0 0 25px #0f0}
-.btn{background:#0f0;color:#000;padding:22px 70px;border-radius:60px;font-size:2.2em;font-weight:bold;text-decoration:none;display:inline-block;margin:35px;box-shadow:0 0 40px #0f0}
-.ai{font-size:1.6em;color:#0ff;margin:20px;padding:18px;background:#000;border:3px dashed #0f0;border-radius:22px}
+.p{font-size:6.2em;color:#0ff;margin:5px}
+canvas{width:96vw;max-width:720px;height:380px;border:10px solid #0f0;border-radius:35px;margin:40px auto;background:#000;
+       box-shadow:0 0 60px #0f0, 0 0 100px #0f0, inset 0 0 80px #0f0}
+.box{background:#001a00;padding:24px;border:6px solid #0f0;border-radius:30px;margin:25px auto;max-width:650px;font-size:1.8em;box-shadow:0 0 30px #0f0}
+.btn{background:#0f0;color:#000;padding:25px 80px;border-radius:70px;font-size:2.4em;font-weight:bold;text-decoration:none;display:inline-block;margin:40px;box-shadow:0 0 50px #0f0}
+.ai{font-size:1.7em;color:#0ff;padding:20px;background:#000;border:4px dashed #0f0;border-radius:25px;margin:20px}
 </style>
 </head>
 <body onload="Telegram.WebApp.ready();Telegram.WebApp.expand()">
 <h1>CRYPTO ALPHA PRO</h1>
 <div class="p">${price}</div>
-<div style="font-size:3em;color:${color};margin:10px">24h ${change}%</div>
+<div style="font-size:3.2em;color:${color};margin:10px">24h ${change}%</div>
 
 <canvas id="c"></canvas>
 
-<div class="box">WHALE ALERT • $42.7M BTC ? Binance (3 min ago)</div>
-<div class="box ai">AI TRACKER • Next pump in 4h 21m<br>Confidence: 89% • Target: $112,000+</div>
-<div class="box">WALLET TRACKER • 7 whales accumulated 842 BTC in last 6h</div>
+<div class="box">WHALE ALERT ? $42.7M BTC ? Binance (3 min ago)</div>
+<div class="box ai">AI TRACKER ? Next pump in 4h 21m<br>Confidence: 89% • Target: $112,000+</div>
+<div class="box">WALLET TRACKER ? 7 whales accumulated 842 BTC in last 6h</div>
 
 <a href="https://t.me/CryptoBot?start=pay_to_@crypto_alert_677_bot" class="btn">
 UNLOCK PREMIUM ? $9/month
 </a>
 
-<div style="font-size:2em;color:#0ff;margin:50px">Next leg up loading...</div>
+<div style="font-size:2.2em;color:#0ff;margin:60px">Next leg up loading...</div>
 
 <script>
-const ctx=document.getElementById("c").getContext("2d");
-ctx.fillStyle="#000";ctx.fillRect(0,0,680,340);
-ctx.strokeStyle="#0f0";ctx.lineWidth=12;ctx.shadowBlur=30;ctx.shadowColor="#0f0";
-ctx.beginPath();ctx.moveTo(40,300);
-[300,270,240,265,210,170,135,100,75,50,30,18].forEach((y,i)=>ctx.lineTo(40+i*53,y));
+// ULTRA MASSIVE GLOWING CHART
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+canvas.width = 720;
+canvas.height = 380;
+
+ctx.fillStyle = "#000";
+ctx.fillRect(0, 0, 720, 380);
+
+ctx.strokeStyle = "#0f0";
+ctx.lineWidth = 16;
+ctx.shadowBlur = 50;
+ctx.shadowColor = "#0f0";
+
+ctx.beginPath();
+ctx.moveTo(60, 340);
+const points = [340,310,280,295,240,190,150,110,85,60,35,20];
+points.forEach((y,i) => ctx.lineTo(60 + i*55, y));
 ctx.stroke();
-ctx.fillStyle="rgba(0,255,0,0.45)";
-ctx.lineTo(640,340);ctx.lineTo(40,340);ctx.fill();
+
+ctx.fillStyle = "rgba(0,255,0,0.5)";
+ctx.lineTo(680, 380);
+ctx.lineTo(60, 380);
+ctx.fill();
 </script>
 </body></html>`);
 });
