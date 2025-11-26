@@ -43,7 +43,7 @@ canvas{display:block;width:96vw;max-width:750px;height:420px;margin:40px auto;bo
 <canvas id="c"></canvas>
 
 <div class="box">WHALE ALERT ? $42.7M BTC ? Binance (3 min ago)</div>
-<div class="box">AI TRACKER ? Next pump in 4h 21m • Target: $112,000+</div>
+<div class="box">AI TRACKER ? Next pump in 4h 21m • Confidence: 89% • Target: $112,000+</div>
 <div class="box">WALLET TRACKER ? 7 whales bought 842 BTC in last 6h</div>
 
 <a href="https://t.me/CryptoBot?start=pay_to_@crypto_alert_677_bot" class="btn">UNLOCK PREMIUM ? $9/month</a>
@@ -51,35 +51,21 @@ canvas{display:block;width:96vw;max-width:750px;height:420px;margin:40px auto;bo
 <div style="font-size:2.3em;color:#0ff;margin:70px">Next leg up loading...</div>
 
 <script>
-// THIS IS THE GRAPH THAT CANNOT BE KILLED
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
-
-// FORCE EXACT PIXEL SIZE — THIS IS THE KEY
 canvas.width = 750;
 canvas.height = 420;
 
-ctx.fillStyle = "#000";
-ctx.fillRect(0, 0, 750, 420);
-
-ctx.strokeStyle = "#0f0";
-ctx.lineWidth = 20;
-ctx.shadowBlur = 60;
-ctx.shadowColor = "#0f0";
-
-ctx.beginPath();
-ctx.moveTo(80, 380);
+ctx.fillStyle = "#000"; ctx.fillRect(0, 0, 750, 420);
+ctx.strokeStyle = "#0f0"; ctx.lineWidth = 20; ctx.shadowBlur = 60; ctx.shadowColor = "#0f0";
+ctx.beginPath(); ctx.moveTo(80, 380);
 const yPoints = [380, 340, 300, 320, 260, 200, 150, 100, 70, 45, 25, 15];
 yPoints.forEach((y, i) => ctx.lineTo(80 + i * 58, y));
 ctx.stroke();
-
-// Fill under the line
-ctx.lineTo(720, 420);
-ctx.lineTo(80, 420);
-ctx.fillStyle = "rgba(0, 255, 0, 0.55)";
-ctx.fill();
+ctx.lineTo(720, 420); ctx.lineTo(80, 420);
+ctx.fillStyle = "rgba(0, 255, 0, 0.55)"; ctx.fill();
 </script>
 </body></html>`);
 });
 
-app.listen(process.env.PORT || 10000, "0.0.0.0", () => console.log("GRAPH IS ALIVE"));
+app.listen(process.env.PORT || 10000, "0.0.0.0");
