@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 const app = express();
 
 app.get('/', (req, res) => {
-  res.send('OK'); // Health check for Vercel
+  res.send('OK'); // Health check
 });
 
 app.get('/telegram', (req, res) => {
