@@ -1,25 +1,21 @@
-import express from "express";
-import fetch from "node-fetch";
-
+const express = require("express");
+const fetch = require("node-fetch");
 const app = express();
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json());
 
-// In-memory storage
-const PORTFOLIOS = {};
+// Storage
 const PREMIUM = new Set();
+const PORTFOLIOS = {};
 
-app.get("/", (req,res) => res.send(`
-  <h1 style="color:#0f0;background:#000;text-align:center;padding:200px;font-family:monospace">
-    CRYPTO ALPHA PRO LIVE!<br>
-    <a href="/telegram?id=777" style="color:#0ff;font-size:50px">OPEN DASHBOARD</a>
-  </h1>
-`));
+// Root
+app.get("/", (req,res)=>res.send("<h1 style=\"color:#0f0;background:#000;text-align:center;padding:200px;font-family:monospace\">CRYPTO ALPHA PRO LIVE!<br><a href=\"/telegram?id=777\" style=\"color:#0ff;font-size:50px\">OPEN DASHBOARD</a></h1>"));
 
-app.get("/telegram", async (req,res) => {
+// Dashboard
+app.get("/telegram", async (req,res)=>{
   const userId = req.query.id || "0";
   const isPremium = PREMIUM.has(userId);
 
-  // REAL PRICE — 3 fallbacks
+  // Real price
   let price = 108420, change = "+6.9", color = "#0f0";
   try {
     const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true");
@@ -28,23 +24,14 @@ app.get("/telegram", async (req,res) => {
       price = j.bitcoin.usd;
       change = j.bitcoin.usd_24h_change.toFixed(2);
     }
-  } catch(e) {
-    try {
-      const r = await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT");
-      if (r.ok) {
-        const j = await r.json();
-        price = parseFloat(j.lastPrice);
-        change = ((j.lastPrice - j.openPrice)/j.openPrice*100).toFixed(2);
-      }
-    } catch(e) {}
-  }
+  } catch(e) {}
   price = "$" + Number(price).toLocaleString();
   color = parseFloat(change) >= 0 ? "#0f0" : "#f66";
-  if (parseFloat(change) >= 0 && change !== "+6.9") change = "+" + change;
+  if (parseFloat(change) >= 0) change = "+" + change;
 
-  // PORTFOLIO PnL
-  let pnlBox = "";
-  if (isPremium && PORTFOLIOS[userId]?.length > 0) {
+  // Portfolio
+  let pnlText = "";
+  if (isPremium && PORTFOLIOS[userId]) {
     let total = 0;
     for (const h of PORTFOLIOS[userId]) {
       try {
@@ -54,23 +41,21 @@ app.get("/telegram", async (req,res) => {
         total += (cur - h.buyPrice) * h.amount;
       } catch(e) {}
     }
-    pnlBox = total >= 0 
-      ? `<div class="box" style="color:#0f0;font-size:2.2em">Portfolio: +$${total.toFixed(2)}</div>`
-      : `<div class="box" style="color:#f66;font-size:2.2em">Portfolio: $${total.toFixed(2)}</div>`;
+    pnlText = total >= 0 
+      ? `<div class="box" style="color:#0f0;font-size:2em">Portfolio: +$${total.toFixed(2)}</div>`
+      : `<div class="box" style="color:#f66;font-size:2em">Portfolio: $${total.toFixed(2)}</div>`;
   }
 
-  const premiumSection = isPremium ? pnlBox : 
-    `<a href="https://t.me/CryptoBot?start=pay_to_@crypto_alert_677_bot" class="btn">UNLOCK PREMIUM $9/month</a>`;
+  const premiumContent = isPremium ? pnlText : 
+    `<a href="https://t.me/CryptoBot?start=pay_to_@crypto_alert_677_bot" class="btn">UNLOCK PREMIUM ? $9/month</a>`;
 
   res.send(`
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Crypto Alpha Pro</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<title>Crypto Alpha Pro</title><script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 body{margin:0;background:#000;color:#0f0;font-family:monospace;text-align:center;padding:20px}
 h1{color:#0ff;font-size:3em}.p{font-size:6.5em;color:#0ff}
-canvas{display:block;width:96vw;max-width:750px;height:420px;margin:40px auto;border:12px solid #0f0;border-radius:40px;background:#000;
-       box-shadow:0 0 80px #0f0,0 0 120px #0f0,inset 0 0 100px #0f0}
+canvas{display:block;width:96vw;max-width:750px;height:420px;margin:40px auto;border:12px solid #0f0;border-radius:40px;background:#000;box-shadow:0 0 80px #0f0,0 0 120px #0f0,inset 0 0 100px #0f0}
 .box{background:#001a00;padding:25px;border:6px solid #0f0;border-radius:35px;margin:25px auto;max-width:700px;font-size:1.9em;box-shadow:0 0 40px #0f0}
 .btn{background:#0f0;color:#000;padding:28px 90px;border-radius:80px;font-size:2.6em;font-weight:bold;text-decoration:none;display:inline-block;margin:45px;box-shadow:0 0 60px #0f0}
 </style>
@@ -80,12 +65,12 @@ canvas{display:block;width:96vw;max-width:750px;height:420px;margin:40px auto;bo
 <div class="p">${price}</div>
 <div style="font-size:3.5em;color:${color}">24h ${change}%</div>
 <canvas id="c"></canvas>
-<div class="box">WHALE ALERT $42.7M BTC Binance (3 min ago)</div>
-<div class="box">AI TRACKER Next pump in 4h 21m Target: $112,000+</div>
-${premiumSection}
+<div class="box">WHALE ALERT ? $42.7M BTC ? Binance (3 min ago)</div>
+<div class="box">AI TRACKER ? Next pump in 4h 21m • Target: $112,000+</div>
+${premiumContent}
 <script>
-const c=document.getElementById("c");const ctx=c.getContext("2d");
-c.width=750;c.height=420;ctx.fillStyle="#000";ctx.fillRect(0,0,750,420);
+const canvas=document.getElementById("c");const ctx=canvas.getContext("2d");
+canvas.width=750;canvas.height=420;ctx.fillStyle="#000";ctx.fillRect(0,0,750,420);
 ctx.strokeStyle="#0f0";ctx.lineWidth=20;ctx.shadowBlur=60;ctx.shadowColor="#0f0";
 ctx.beginPath();ctx.moveTo(80,380);
 [380,340,300,320,260,200,150,100,70,45,25,15].forEach((y,i)=>ctx.lineTo(80+i*58,y));
@@ -95,21 +80,20 @@ ctx.fillStyle="rgba(0,255,0,0.55)";ctx.fill();
 </body></html>`);
 });
 
-// BOT ENDPOINTS
-app.post("/add", (req,res) => {
-  const {id, coin, amount, buy} = req.body || {};
+// Bot endpoints
+app.post("/add", (req,res)=>{
+  const {id, coin, amount, buy} = req.body;
   if (!id || !coin || !amount || !buy) return res.status(400).send("BAD");
   if (!PORTFOLIOS[id]) PORTFOLIOS[id] = [];
-  PORTFOLIOS[id].push({coin: coin.toLowerCase(), amount: +amount, buyPrice: +buy});
+  PORTFOLIOS[id].push({coin:coin.toLowerCase(), amount:+amount, buyPrice:+buy});
   PREMIUM.add(id);
   res.send("OK");
 });
 
-app.post("/paid", (req,res) => {
-  const {id} = req.body || {};
+app.post("/paid", (req,res)=>{
+  const {id} = req.body;
   if (id) PREMIUM.add(id);
   res.send("PREMIUM");
 });
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, "0.0.0.0", () => console.log("STEP 3 100% LIVE"));
+app.listen(process.env.PORT || 10000, "0.0.0.0");
