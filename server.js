@@ -7,7 +7,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/telegram', (req, res) => {
-  // Send HTML immediately (no hang on cold start)
+  // Send HTML immediately (no hang)
   res.send(
 <!DOCTYPE html>
 <html>
@@ -32,7 +32,7 @@ canvas{width:95%;max-width:600px;height:280px;border:6px solid #0f0;border-radiu
 <div style="font-size:1.7em;color:#0f9;margin-top:20px">Whales buying the dip — next leg up loading</div>
 <script>
 // Update price in background (no hang)
-fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true')
+fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', {headers: {"User-Agent": "CryptoAlphaPro"}})
   .then(r => r.json())
   .then(d => {
     const p = document.querySelector('.p');
