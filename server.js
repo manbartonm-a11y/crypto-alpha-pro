@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 const app = express();
 
 app.get('/', (req, res) => {
-  res.send('OK'); // Health check
+  res.send('OK'); // Health check for Vercel
 });
 
 app.get('/telegram', (req, res) => {
@@ -31,7 +31,7 @@ canvas{width:95%;max-width:600px;height:280px;border:6px solid #0f0;border-radiu
 <div style="font-size:1.7em;color:#0f9;margin-top:20px">Whales buying the dip — next leg up loading</div>
 <script>
 // Background price update (no hang)
-fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true')
+fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', {headers:{"User-Agent":"CryptoAlphaPro"}})
   .then(r => r.json())
   .then(d => {
     document.querySelector('.p').textContent = '$' + Number(d.bitcoin.usd).toLocaleString();
