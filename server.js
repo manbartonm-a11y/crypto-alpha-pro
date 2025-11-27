@@ -1,1 +1,40 @@
-const express = require("express"); const app = express(); app.get("/", (req,res)=>res.send("OK")); app.get("/telegram", (req,res)=>{ res.send("<html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Crypto Alpha Pro</title><style>body{margin:0;background:#000;color:#0f0;font-family:monospace;text-align:center;padding:20px}h1{color:#0ff;font-size:3.5em}.p{font-size:7em;color:#0ff}svg{width:96%;max-width:800px;height:460px;margin:40px auto;border:14px solid #0f0;border-radius:50px;background:#000;box-shadow:0 0 100px #0f0}.box{background:#001a00;padding:28px;border:8px solid #0f0;border-radius:40px;margin:30px auto;max-width:750px;font-size:2em;box-shadow:0 0 50px #0f0}.btn{background:#0f0;color:#000;padding:35px 120px;border-radius:100px;font-size:3em;text-decoration:none;display:inline-block;margin:50px;box-shadow:0 0 80px #0f0}</style></head><body><h1>CRYPTO ALPHA PRO</h1><div class=\"p\">$108,420</div><div style=\"font-size:4em;color:#0f0\">24h +6.9%</div><svg viewBox=\"0 0 800 460\"><rect width=\"800\" height=\"460\" fill=\"#000\"/><path d=\"M80 420 Q160 370 240 340 Q320 360 400 290 Q480 210 560 140 Q640 90 720 60\" stroke=\"#0f0\" stroke-width=\"22\" fill=\"none\"/><path d=\"M80 420 Q160 370 240 340 Q320 360 400 290 Q480 210 560 140 Q640 90 720 60 L720 460 L80 460 Z\" fill=\"rgba(0,255,0,0.6)\"/><rect x=\"80\" y=\"420\" width=\"640\" height=\"40\" fill=\"#0f0\" opacity=\"0.3\"/></svg><div class=\"box\">WHALE ALERT $42.7M BTC ? Binance (3 min ago)</div><div class=\"box\">AI TRACKER Next pump in 4h 21m • Target: $112,000+</div><a href=\"https://t.me/CryptoBot?start=pay_to_@crypto_alert_677_bot\" class=\"btn\">UNLOCK PREMIUM $9/month</a></body></html>"); }); app.listen(process.env.PORT || 10000, "0.0.0.0");
+const express = require("express");
+const app = express();
+
+app.get("/", (req,res)=>res.send("OK"));
+
+app.get("/telegram", (req,res)=>{
+  res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Crypto Alpha Pro</title>
+<style>
+body{margin:0;background:#000;color:#0f0;font-family:monospace;text-align:center;padding:20px}
+h1{color:#0ff;font-size:3.5em}
+.p{font-size:7em;color:#0ff}
+svg{width:96%;max-width:800px;height:460px;margin:40px auto;border:14px solid #0f0;border-radius:50px;background:#000;box-shadow:0 0 100px #0f0}
+.box{background:#001a00;padding:28px;border:8px solid #0f0;border-radius:40px;margin:30px auto;max-width:750px;font-size:2em;box-shadow:0 0 50px #0f0}
+.btn{background:#0f0;color:#000;padding:35px 120px;border-radius:100px;font-size:3em;text-decoration:none;display:inline-block;margin:50px;box-shadow:0 0 80px #0f0}
+</style>
+</head>
+<body>
+<h1>CRYPTO ALPHA PRO</h1>
+<div class="p">$108,420</div>
+<div style="font-size:4em;color:#0f0">24h +6.9%</div>
+<svg viewBox="0 0 800 460">
+  <rect width="800" height="460" fill="#000"/>
+  <path d="M80 420 Q160 370 240 340 Q320 360 400 290 Q480 210 560 140 Q640 90 720 60" stroke="#0f0" stroke-width="22" fill="none"/>
+  <path d="M80 420 Q160 370 240 340 Q320 360 400 290 Q480 210 560 140 Q640 90 720 60 L720 460 L80 460 Z" fill="rgba(0,255,0,0.6)"/>
+</svg>
+<div class="box">WHALE ALERT $42.7M BTC ? Binance (3 min ago)</div>
+<div class="box">AI TRACKER Next pump in 4h 21m • Target: $112,000+</div>
+<a href="https://t.me/CryptoBot?start=pay_to_@crypto_alert_677_bot" class="btn">UNLOCK PREMIUM $9/month</a>
+</body>
+</html>
+`);
+});
+
+app.listen(process.env.PORT || 10000, "0.0.0.0");
