@@ -1,42 +1,64 @@
 const express = require('express');
 const app = express();
 
-app.get('/', (req,res)=>res.send('OK'));
-
-app.get('/telegram', (req,res)=>{
-  res.send(\
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Crypto Alpha Pro</title>
-<style>
-body{margin:0;background:#000;color:#0f0;font-family:monospace;text-align:center;padding:20px}
-h1{color:#0ff;font-size:3.5em}
-.p{font-size:7em;color:#0ff}
-svg{width:96%;max-width:800px;height:460px;margin:40px auto;border:14px solid #0f0;border-radius:50px;background:#000;box-shadow:0 0 100px #0f0}
-.box{background:#001a00;padding:28px;border:8px solid #0f0;border-radius:40px;margin:30px auto;max-width:750px;font-size:2em;box-shadow:0 0 50px #0f0}
-.btn{background:#0f0;color:#000;padding:35px 120px;border-radius:100px;font-size:3em;text-decoration:none;display:inline-block;margin:50px;box-shadow:0 0 80px #0f0}
-</style>
-</head>
-<body>
-<h1>CRYPTO ALPHA PRO</h1>
-<div class="p">,420</div>
-<div style="font-size:4em;color:#0f0">24h +6.9%</div>
-
-<svg viewBox="0 0 800 460">
-  <rect width="800" height="460" fill="#000"/>
-  <path d="M80 420 Q160 370 240 340 Q320 360 400 290 Q480 210 560 140 Q640 90 720 60" stroke="#0f0" stroke-width="22" fill="none"/>
-  <path d="M80 420 Q160 370 240 340 Q320 360 400 290 Q480 210 560 140 Q640 90 720 60 L720 460 L80 460 Z" fill="rgba(0,255,0,0.6)"/>
-</svg>
-
-<div class="box">WHALE ALERT .7M BTC ? Binance (3 min ago)</div>
-<div class="box">AI TRACKER Next pump in 4h 21m • Target: ,000+</div>
-<a href="https://t.me/CryptoBot?start=pay_to_@crypto_alert_677_bot" class="btn">UNLOCK PREMIUM /month</a>
-</body>
-</html>
-\);
+app.get('/', (req, res) => {
+  res.send('OK');
 });
 
-app.listen(process.env.PORT || 10000, '0.0.0.0');
+app.get('/telegram', (req, res) => {
+  res.write('<!DOCTYPE html>');
+  res.write('<html>');
+  res.write('<head>');
+  res.write('<meta charset="utf-8">');
+  res.write('<meta name="viewport" content="width=device-width,initial-scale=1">');
+  res.write('<title>Crypto Alpha Pro</title>');
+  res.write('<style>');
+  res.write('body{margin:0;background:#000;color:#0f0;font-family:monospace;text-align:center;padding:20px}');
+  res.write('h1{color:#0ff;font-size:3em}');
+  res.write('.p{font-size:5.5em;color:#0f9;margin:10px}');
+  res.write('canvas{width:95%;max-width:600px;height:280px;border:6px solid #0f0;border-radius:20px;margin:30px auto;background:#000}');
+  res.write('</style>');
+  res.write('</head>');
+  res.write('<body>');
+  res.write('<h1>CRYPTO ALPHA PRO</h1>');
+  res.write('<div class="p">,420</div>');
+  res.write('<div style="font-size:2em;color:#0f0">24h Up +6.9%</div>');
+  res.write('<canvas id="c"></canvas>');
+  res.write('<div style="background:#001a00;padding:20px;border:3px solid #0f0;border-radius:20px;margin:20px;font-size:1.5em">WHALE ALERT .7M BTC ? Binance (3 min ago)</div>');
+  res.write('<div style="font-size:1.7em;color:#0f9;margin-top:20px">Whales buying the dip — next leg up loading</div>');
+  res.write('<script>');
+  res.write('const canvas = document.getElementById("c");');
+  res.write('const ctx = canvas.getContext("2d");');
+  res.write('canvas.width = 600;');
+  res.write('canvas.height = 280;');
+  res.write('ctx.fillStyle = "#000";');
+  res.write('ctx.fillRect(0, 0, 600, 280);');
+  res.write('ctx.strokeStyle = "#0f0";');
+  res.write('ctx.lineWidth = 8;');
+  res.write('ctx.beginPath();');
+  res.write('ctx.moveTo(0, 250);');
+  res.write('ctx.lineTo(50, 230);');
+  res.write('ctx.lineTo(100, 220);');
+  res.write('ctx.lineTo(150, 180);');
+  res.write('ctx.lineTo(200, 200);');
+  res.write('ctx.lineTo(250, 160);');
+  res.write('ctx.lineTo(300, 140);');
+  res.write('ctx.lineTo(350, 120);');
+  res.write('ctx.lineTo(400, 100);');
+  res.write('ctx.lineTo(450, 80);');
+  res.write('ctx.lineTo(500, 60);');
+  res.write('ctx.lineTo(550, 40);');
+  res.write('ctx.lineTo(600, 30);');
+  res.write('ctx.stroke();');
+  res.write('ctx.fillStyle = "rgba(0,255,0,0.3)";');
+  res.write('ctx.fill();');
+  res.write('</script>');
+  res.write('</body>');
+  res.write('</html>');
+  res.end();
+});
+
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log('Crypto Alpha Pro LIVE on Render!');
+});
