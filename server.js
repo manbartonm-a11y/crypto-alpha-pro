@@ -2,28 +2,30 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-const PORTFOLIOS = {};   // {userId: [{buy: 60000, amount: 0.5}, ...]}
-const PREMIUM = new Set(); // userId list
+const PORTFOLIOS = {};
+const PREMIUM = new Set();
 
 app.get('/', (req,res)=>res.send('OK'));
 
 app.get('/telegram', (req,res)=>{
-  const userId = req.query.id || 'guest';
+  const userId = req.query.id || '0';
   const isPremium = PREMIUM.has(userId);
 
-  let pnlBox = '';
+  // PREMIUM CONTENT
+  let premiumContent = '';
   if (isPremium && PORTFOLIOS[userId]) {
     let total = 0;
     PORTFOLIOS[userId].forEach(p => total += (108420 - p.buy) * p.amount);
-    const sign = total >= 0 ? '+' : '';
+    const sign = total >= 0 ? '+' : '-';
     const color = total >= 0 ? '#0f0' : '#f66';
-    pnlBox = `<div style="background:#001a00;padding:40px;border:12px solid ${color};border-radius:60px;margin:60px auto;max-width:900px;font-size:4em;color:${color};box-shadow:0 0 120px ${color}">
+    premiumContent = `<div style="background:#001a00;padding:50px;border:14px solid ${color};border-radius:70px;margin:70px auto;max-width:950px;font-size:5em;color:${color};box-shadow:0 0 180px ${color}">
       Portfolio PnL: ${sign}$${Math.abs(total).toFixed(0)}
     </div>`;
   }
 
-  const paywall = isPremium ? pnlBox : `<a href="https://t.me/CryptoBot?start=pay_to_@crypto_alert_677_bot"
-    style="background:#0f0;color:#000;padding:45px 160px;border-radius:140px;font-size:4em;text-decoration:none;display:inline-block;margin:70px;box-shadow:0 0 150px #0f0">
+  // PAY BUTTON — ONLY SHOW IF NOT PREMIUM
+  const payButton = isPremium ? '' : `<a href="https://t.me/CryptoBot?start=pay_to_@crypto_alert_677_bot"
+    style="background:#0f0;color:#000;padding:50px 180px;border-radius:150px;font-size:4.5em;text-decoration:none;display:inline-block;margin:80px;box-shadow:0 0 200px #0f0">
     UNLOCK PREMIUM $9/month
   </a>`;
 
@@ -43,7 +45,8 @@ canvas{width:98%;max-width:900px;height:500px;margin:50px auto;border:16px solid
 <canvas id="c"></canvas>
 <div class="box">WHALE ALERT $42.7M BTC ? Binance (3 min ago)</div>
 <div class="box">AI TRACKER Next pump in 4h 21m • Target: $112,000+</div>
-${paywall}
+${premiumContent}
+${payButton}
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 c.width=900;c.height=500;
@@ -58,19 +61,19 @@ ctx.fillStyle='rgba(0,255,0,0.7)';ctx.fill();
 `);
 });
 
-// Bot will call these
 app.post('/add', (req,res)=>{
   const {id, amount, buy} = req.body;
-  if (!id || !amount || !buy) return res.send('NO');
-  if (!PORTFOLIOS[id]) PORTFOLIOS[id] = [];
-  PORTFOLIOS[id].push({buy: +buy, amount: +amount});
-  PREMIUM.add(id);
+  if(id && amount && buy){
+    if(!PORTFOLIOS[id]) PORTFOLIOS[id] = [];
+    PORTFOLIOS[id].push({buy: +buy, amount: +amount});
+    PREMIUM.add(id);
+  }
   res.send('OK');
 });
 
 app.post('/paid', (req,res)=>{
-  if (req.body.id) PREMIUM.add(req.body.id);
+  if(req.body.id) PREMIUM.add(req.body.id);
   res.send('OK');
 });
 
-app.listen(process.env.PORT || 10000, '0.0.0.0', ()=>console.log('STEP 3 LIVE'));
+app.listen(process.env.PORT || 10000, '0.0.0.0');
