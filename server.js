@@ -1,69 +1,83 @@
 const express = require('express');
+const fetch = require('node-fetch');
 const app = express();
-app.use(express.json());
 
-const PORTFOLIOS = {};
-const PREMIUM = new Set();
+app.get('/', (req, res) => {
+  res.send('OK'); // Health check for Vercel
+});
 
-app.get('/telegram', async (req, res) => {
-  const userId = req.query.id || '0';
-  const isPremium = PREMIUM.has(userId);
+app.get('/telegram', (req, res) => {
+  let price = ',420';
+  let change = 'Up +6.9%';
+  let color = '#0f0';
 
-  let price = 108420, change = '+6.9';
-  try {
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
-    if (r.ok) { const j = await r.json(); price = j.bitcoin.usd; change = j.bitcoin.usd_24h_change.toFixed(2); }
-  } catch(e) {}
-
-  let pnlBox = '';
-  if (isPremium && PORTFOLIOS[userId]) {
-    let total = 0;
-    PORTFOLIOS[userId].forEach(h => total += (price - h.buy) * h.amount);
-    const color = total >= 0 ? '#0f0' : '#f66';
-    pnlBox = <div style='background:#001a00;padding:30px;border:8px solid ;border-radius:40px;margin:40px auto;max-width:700px;font-size:2.5em;color:;box-shadow:0 0 80px '>
-      Portfolio PnL: C:\Users\tulip\Desktop\programing crypto 1\proxy-server{Math.abs(total).toFixed(0)}
-    </div>;
-  }
-
-  const payButton = isPremium ? pnlBox : 
-    <a href='https://t.me/CryptoBot?start=pay_to_@crypto_alert_677_bot' 
-       style='background:#0f0;color:#000;padding:35px 120px;border-radius:100px;font-size:3em;text-decoration:none;display:inline-block;margin:50px;box-shadow:0 0 80px #0f0'>
-      UNLOCK PREMIUM /month
-    </a>;
+  // Background update (no hang)
+  fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true')
+    .then(r => r.json())
+    .then(d => {
+      const p = document.querySelector('.p');
+      p.textContent = '$' + Number(d.bitcoin.usd).toLocaleString();
+      const ch = d.bitcoin.usd_24h_change.toFixed(2);
+      const c = document.querySelector('div[style*="font-size:2em"]');
+      c.innerHTML = '24h ' + (ch>0 ? '<span style="color:#0f0">Up +' + ch + '%</span>' : '<span style="color:#f66">Down ' + Math.abs(ch) + '%</span>');
+    })
+    .catch(e => {});
 
   res.send(\
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Crypto Alpha Pro</title>
 <style>
 body{margin:0;background:#000;color:#0f0;font-family:monospace;text-align:center;padding:20px}
-h1{color:#0ff;font-size:3.5em}.p{font-size:7em;color:#0ff}
-canvas{width:96%;max-width:800px;height:460px;margin:40px auto;border:14px solid #0f0;border-radius:50px;background:#000;box-shadow:0 0 100px #0f0}
-.box{background:#001a00;padding:28px;border:8px solid #0f0;border-radius:40px;margin:30px auto;max-width:750px;font-size:2em;box-shadow:0 0 50px #0f0}
+h1{color:#0ff;font-size:3em}
+.p{font-size:5.5em;color:#0f9;margin:10px}
+canvas{width:95%;max-width:600px;height:280px;border:6px solid #0f0;border-radius:20px;margin:30px auto;background:#000}
 </style>
-</head><body>
+</head>
+<body>
 <h1>CRYPTO ALPHA PRO</h1>
-<div class="p">C:\Users\tulip\Desktop\programing crypto 1\proxy-server{Number(price).toLocaleString()}</div>
-<div style="font-size:4em;color:">24h %</div>
+<div class="p"></div>
+<div style="font-size:2em;color:#0f0">24h </div>
 <canvas id="c"></canvas>
-<div class="box">WHALE ALERT .7M BTC ? Binance (3 min ago)</div>
-<div class="box">AI TRACKER Next pump in 4h 21m • Target: ,000+</div>
-
+<div style="background:#001a00;padding:20px;border:3px solid #0f0;border-radius:20px;margin:20px;font-size:1.5em">WHALE ALERT .7M BTC ? Binance (3 min ago)</div>
+<div style="font-size:1.7em;color:#0f9;margin-top:20px">Whales buying the dip — next leg up loading</div>
 <script>
-const c=document.getElementById('c'),ctx=c.getContext('2d');
-c.width=800;c.height=460;
-ctx.fillStyle='#000';ctx.fillRect(0,0,800,460);
-ctx.strokeStyle='#0f0';ctx.lineWidth=22;ctx.shadowBlur=70;ctx.shadowColor='#0f0';
-ctx.beginPath();ctx.moveTo(80,420);
-[420,370,320,340,280,210,150,100,70,45,20,10].forEach((y,i)=>ctx.lineTo(80+i*62,y));
-ctx.stroke();ctx.lineTo(780,460);ctx.lineTo(80,460);
-ctx.fillStyle='rgba(0,255,0,0.6)';ctx.fill();
-setInterval(()=>location.reload(),60000);
+// Draw chart immediately (pure JS)
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = 600;
+canvas.height = 280;
+ctx.fillStyle = '#000';
+ctx.fillRect(0, 0, 600, 280);
+ctx.strokeStyle = '#0f0';
+ctx.lineWidth = 8;
+ctx.beginPath();
+ctx.moveTo(0, 250);
+ctx.lineTo(50, 230);
+ctx.lineTo(100, 220);
+ctx.lineTo(150, 180);
+ctx.lineTo(200, 200);
+ctx.lineTo(250, 160);
+ctx.lineTo(300, 140);
+ctx.lineTo(350, 120);
+ctx.lineTo(400, 100);
+ctx.lineTo(450, 80);
+ctx.lineTo(500, 60);
+ctx.lineTo(550, 40);
+ctx.lineTo(600, 30);
+ctx.stroke();
+ctx.fillStyle = 'rgba(0,255,0,0.3)';
+ctx.fill();
 </script>
-</body></html>
+</body>
+</html>
 \);
 });
 
-app.post('/add', (req,res)=>{ const {id,amount,buy}=req.body; if(id&&amount&&buy){ if(!PORTFOLIOS[id])PORTFOLIOS[id]=[]; PORTFOLIOS[id].push({amount:+amount,buy:+buy}); PREMIUM.add(id); } res.send('OK'); });
-app.post('/paid', (req,res)=>{ const {id}=req.body; if(id)PREMIUM.add(id); res.send('OK'); });
-
-app.listen(process.env.PORT || 3000);
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log('Crypto Alpha Pro LIVE on Vercel!');
+});
