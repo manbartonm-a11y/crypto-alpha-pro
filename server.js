@@ -4,7 +4,7 @@ const app = express();
 app.get('/', (req, res) => res.send('OK'));
 
 app.get('/telegram', (req, res) => {
-  res.write('<!DOCTYPE html><html><head>');
+  res.write('<!DOCTYPE html><html lang="en"><head>');
   res.write('<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">');
   res.write('<title>Crypto Alpha Pro</title>');
   res.write('<style>body{margin:0;background:#000;color:#0f0;font-family:monospace;text-align:center;padding:20px}h1{color:#0ff;font-size:3.5em}.p{font-size:5.5em;color:#0f9;margin:10px}canvas{width:95%;max-width:600px;height:280px;border:6px solid #0f0;border-radius:20px;margin:30px auto;background:#000}</style>');
@@ -21,8 +21,11 @@ app.get('/telegram', (req, res) => {
   res.write('x.strokeStyle="#0f0";x.lineWidth=8;x.beginPath();');
   res.write('x.moveTo(0,250);x.lineTo(50,230);x.lineTo(100,220);x.lineTo(150,180);x.lineTo(200,200);x.lineTo(250,160);x.lineTo(300,140);x.lineTo(350,120);x.lineTo(400,100);x.lineTo(450,80);x.lineTo(500,60);x.lineTo(550,40);x.lineTo(600,30);');
   res.write('x.stroke();x.fillStyle="rgba(0,255,0,0.3)";x.fill();');
-  res.write('</script></body></html>');
+  res.write('</script>');
+  res.write('</body></html>');
   res.end();
 });
 
-app.listen(process.env.PORT || 10000, '0.0.0.0', () => console.log('LIVE'));
+app.listen(process.env.PORT || 10000, '0.0.0.0', () => {
+  console.log('Crypto Alpha Pro is LIVE');
+});
