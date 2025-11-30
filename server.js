@@ -42,7 +42,6 @@ canvas{width:95%;max-width:600px;height:280px;border:6px solid #0f0;border-radiu
 <div style="background:#001a00;padding:20px;border:3px solid #0f0;border-radius:20px;margin:20px;font-size:1.5em">WHALE ALERT .7M BTC ? Binance (3 min ago)</div>
 <div style="font-size:1.7em;color:#0f9;margin-top:20px">Whales buying the dip — next leg up loading</div>
 <script>
-// Chart
 const c = document.getElementById("c"), ctx = c.getContext("2d");
 c.width = 600; c.height = 280;
 ctx.fillStyle = "#000"; ctx.fillRect(0, 0, 600, 280);
