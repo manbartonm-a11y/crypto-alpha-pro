@@ -1,16 +1,33 @@
 const express = require('express');
+const fetch = require('node-fetch');
 const app = express();
 
 app.get('/', (req, res) => res.send('OK'));
 
-app.get('/telegram', (req, res) => {
+app.get('/telegram', async (req, res) => {
+  let price = 108420;
+  let change = '+6.9';
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', {
+      headers: { 'User-Agent': 'CryptoAlphaPro/1.0' }
+    });
+    if (r.ok) {
+      const j = await r.json();
+      price = Math.round(j.bitcoin.usd);
+      change = j.bitcoin.usd_24h_change.toFixed(2);
+    }
+  } catch(e) {}
+
+  const priceStr = '$' + price.toLocaleString('en-US');
+  const color = change >= 0 ? '#0f0' : '#f66';
+
   res.write('<!DOCTYPE html><html><head>');
   res.write('<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">');
   res.write('<title>Crypto Alpha Pro</title>');
   res.write('<style>body{margin:0;background:#000;color:#0f0;font-family:monospace;text-align:center;padding:20px}h1{color:#0ff;font-size:3.5em}.p{font-size:5.5em;color:#0f9;margin:10px}canvas{width:95%;max-width:600px;height:280px;border:6px solid #0f0;border-radius:20px;margin:30px auto;background:#000}</style></head><body>');
   res.write('<h1>CRYPTO ALPHA PRO</h1>');
-  res.write('<div class="p">$108,420</div>');
-  res.write('<div style="font-size:2em;color:#0f0">24h Up +6.9%</div>');
+  res.write(`<div class="p">${priceStr}</div>`);
+  res.write(`<div style="font-size:2em;color:${color}">24h ${change >= 0 ? '+' : ''}${change}%</div>`);
   res.write('<canvas id="c"></canvas>');
   res.write('<div style="background:#001a00;padding:20px;border:3px solid #0f0;border-radius:20px;margin:20px;font-size:1.5em">WHALE ALERT $42.7M BTC to Binance (3 min ago)</div>');
   res.write('<div style="font-size:1.7em;color:#0f9">AI TRACKER Next pump in 4h 21m • Target: $112,000+</div>');
