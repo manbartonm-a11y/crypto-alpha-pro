@@ -1,9 +1,7 @@
 const express = require('express');
 const app = express();
 
-app.get('/', (req, res) => {
-  res.send('OK');
-});
+app.get('/', (req, res) => res.send('OK'));
 
 app.get('/telegram', (req, res) => {
   res.write('<!DOCTYPE html><html><head>');
