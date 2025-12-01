@@ -5,7 +5,7 @@ const app = express();
 app.get('/', (req, res) => res.send('OK'));
 
 app.get('/telegram', async (req, res) => {
-  let price = 91426, change = '+0.89';
+  let price = 108420, change = '+6.9';
   try {
     const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', {headers: {'User-Agent': 'CryptoAlphaPro'}});
     if (r.ok) {
