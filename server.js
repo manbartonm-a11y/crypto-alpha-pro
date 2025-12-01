@@ -6,26 +6,26 @@ const app = express();
 app.get('/', (req, res) => res.send('OK'));
 
 app.get('/telegram', async (req, res) => {
-  let price = 108420;
-  let change = '+6.9';
+  let price = 91428;           // default only for the first 0.1 sec
+  let change = '+0.92';
   try {
     const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', {
-      headers: { 'User-Agent': 'CryptoAlphaPro/1.0' }
+      headers: { 'User-Agent': 'CryptoAlphaPro/1.0', 'Accept': 'application/json' },
+      timeout: 8000
     });
     if (r.ok) {
       const j = await r.json();
       price = Math.round(j.bitcoin.usd);
       change = j.bitcoin.usd_24h_change.toFixed(2);
     }
-  } catch(e) {}
+  } catch(e) {
+    console.log('fetch failed:', e.message);
+  }
 
   const priceStr = '$' + price.toLocaleString('en-US');
   const color = change >= 0 ? '#0f0' : '#f66';
 
-  res.write('<!DOCTYPE html><html><head>');
-  res.write('<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">');
-  res.write('<title>Crypto Alpha Pro</title>');
-  res.write('<style>body{margin:0;background:#000;color:#0f0;font-family:monospace;text-align:center;padding:20px}h1{color:#0ff;font-size:3.5em}.p{font-size:5.5em;color:#0f9;margin:10px}canvas{width:95%;max-width:600px;height:280px;border:6px solid #0f0;border-radius:20px;margin:30px auto;background:#000}</style></head><body>');
+  res.write('<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Crypto Alpha Pro</title><style>body{margin:0;background:#000;color:#0f0;font-family:monospace;text-align:center;padding:20px}h1{color:#0ff;font-size:3.5em}.p{font-size:5.5em;color:#0f9;margin:10px}canvas{width:95%;max-width:600px;height:280px;border:6px solid #0f0;border-radius:20px;margin:30px auto;background:#000}</style></head><body>');
   res.write('<h1>CRYPTO ALPHA PRO</h1>');
   res.write(`<div class="p">${priceStr}</div>`);
   res.write(`<div style="font-size:2em;color:${color}">24h ${change >= 0 ? '+' : ''}${change}%</div>`);
