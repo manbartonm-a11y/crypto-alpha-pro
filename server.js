@@ -1,11 +1,34 @@
 const express = require('express');
 const fetch = require('node-fetch');
 const app = express();
+app.use(express.json());
 
 let lastWhale = "WHALE ALERT $42.7M BTC to Binance (3 min ago)";
 
+// WHALE ALERT API KEY (paste your key here when you get it)
+const WHALE_KEY = "YOUR_WHALE_KEY_HERE";  // From support email
+
+// Fake whale every 30 sec (replace with real API when key arrives)
 setInterval(async () => {
-  lastWhale = "WHALE ALERT $" + (Math.random()*50+10).toFixed(1) + "M BTC ? unknown wallet";
+  if (WHALE_KEY === "YOUR_WHALE_KEY_HERE") {
+    // Fake for now
+    lastWhale = "WHALE ALERT $" + (Math.random()*50+10).toFixed(1) + "M BTC ? unknown wallet";
+  } else {
+    // Real Whale Alert API
+    try {
+      const r = await fetch(`https://api.whale-alert.io/v1/transactions?min_value=1000000&currency=btc&api_key=${WHALE_KEY}`);
+      if (r.ok) {
+        const j = await r.json();
+        if (j.transactions && j.transactions[0]) {
+          const t = j.transactions[0];
+          const usd = Math.round(t.amount_usd / 1000000);
+          lastWhale = `WHALE ALERT $${usd}M ${t.symbol} to ${t.to.owner || t.to.address.slice(0,10)}... (${Math.round((Date.now() - t.timestamp * 1000)/60000)} min ago)`;
+        }
+      }
+    } catch(e) {
+      lastWhale = "WHALE ALERT $42.7M BTC to Binance (3 min ago)"; // Fallback
+    }
+  }
 }, 30000);
 
 app.get('/', (req, res) => res.send('OK'));
@@ -14,21 +37,12 @@ app.get('/telegram', async (req, res) => {
   const userId = req.query.id || "0";
   const isPremium = userId === "777000";
 
-  // Live BTC price — improved fetch with retry
-  let price = 89600, change = "+0.92";  // Updated fallback to real $89,600
+  // Live BTC price
+  let price = 91426, change = "+0.92";
   try {
-    const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true", {
-      timeout: 5000,  // 5 sec timeout
-      headers: { 'User-Agent': 'CryptoAlphaPro' }
-    });
-    if (r.ok) {
-      const j = await r.json();
-      price = Math.round(j.bitcoin.usd);
-      change = j.bitcoin.usd_24h_change.toFixed(2);
-    }
-  } catch(e) {
-    console.log('Price fetch failed, using fallback:', e.message);
-  }
+    const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true");
+    if (r.ok) { const j = await r.json(); price = Math.round(j.bitcoin.usd); change = j.bitcoin.usd_24h_change.toFixed(2); }
+  } catch(e) {}
 
   const priceStr = "$" + price.toLocaleString("en-US");
   const color = change >= 0 ? "#0f0" : "#f66";
@@ -40,14 +54,20 @@ app.get('/telegram', async (req, res) => {
   res.write(`<div class="p">${priceStr}</div>`);
   res.write(`<div style="font-size:2em;color:${color}">24h ${change >= 0 ? "+" : ""}${change}%</div>`);
   res.write("<canvas id='c'></canvas>");
+
+  // Whale box — blurred for free users
   res.write(`<div style="background:#001a00;padding:20px;border:3px solid #0f0;border-radius:20px;margin:20px;font-size:1.5em${isPremium?'':' class=\"blur\"'}">${lastWhale}</div>`);
+
   res.write("<div style='font-size:1.7em;color:#0f9'>AI TRACKER Next pump in 4h 21m • Target: $112,000+</div>");
+
   if (!isPremium) {
-    res.write("<div class='btn' onclick=\"location.href='https://t.me/CryptoBot?start=pay_to_@crypto_alert_677_bot'\">Pay with Crypto (USDT/BTC/TON)</div>");
+    // TWO PAYMENT BUTTONS
+    res.write("<div class='btn' onclick=\"location.href='https://t.me/CryptoBot?start=pay_12345_@crypto_alert_677_bot'\">Pay with Crypto (USDT/BTC/TON)</div>");
     res.write("<div class='btn' onclick=\"stripe.redirectToCheckout({lineItems:[{price:'prod_TYMpSYYnpnP7EI',quantity:1}],mode:'subscription',successUrl:location.href+'?id=777000',cancelUrl:location.href})\">Pay with Card / PayPal / Apple Pay</div>");
   } else {
     res.write("<div style='color:#0f9;font-size:2em'>PREMIUM ACTIVE</div>");
   }
+
   res.write("<script>const stripe=Stripe('pk_live_51SZvppGrBtr1rroCdgmOZhNQJJyBFGbYUM3XoflqogoL7ujZU122Dj77skxfOXKewdo3vF8C7a92WmDoshPBXt8100QUAxED7q');</script>");
   res.write("<script>const c=document.getElementById('c'),x=c.getContext('2d');c.width=600;c.height=280;x.fillStyle='#000';x.fillRect(0,0,600,280);x.strokeStyle='#0f0';x.lineWidth=8;x.beginPath();x.moveTo(0,250);x.lineTo(50,230);x.lineTo(100,220);x.lineTo(150,180);x.lineTo(200,200);x.lineTo(250,160);x.lineTo(300,140);x.lineTo(350,120);x.lineTo(400,100);x.lineTo(450,80);x.lineTo(500,60);x.lineTo(550,40);x.lineTo(600,30);x.stroke();x.fillStyle='rgba(0,255,0,0.3)';x.fill();</script>");
   res.write("</body></html>");
