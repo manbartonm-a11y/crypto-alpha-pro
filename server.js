@@ -1,21 +1,39 @@
 const express = require('express');
 const fetch = require('node-fetch');
 const app = express();
+app.use(express.json());
 
 let lastWhale = "WHALE ALERT $42.7M BTC to Binance (3 min ago)";
 
-// Fake whale every 30 sec (we’ll replace with real when you get key)
+// YOUR BOT TOKEN FROM @BotFather
+const BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"; // ? PASTE YOUR REAL TOKEN HERE
+
+// List of paid users (Telegram user IDs)
+const PREMIUM_USERS = new Set(); // we will add IDs after payment
+
+// SEND PUSH TO ALL PREMIUM USERS
+async function sendPush(text) {
+  for (const chatId of PREMIUM_USERS) {
+    try {
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}&disable_web_page_preview=true`);
+    } catch(e) {}
+  }
+}
+
+// Fake whale every 30 sec (replace with real API later)
 setInterval(async () => {
-  lastWhale = "WHALE ALERT $" + (Math.random()*50+10).toFixed(1) + "M BTC ? unknown wallet";
+  const fakeUsd = (Math.random() * 40 + 10).toFixed(1);
+  lastWhale = `WHALE ALERT $${fakeUsd}M BTC ? unknown wallet just now`;
+  sendPush(lastWhale); // ? THIS SENDS TO ALL PAID USERS INSTANTLY
 }, 30000);
 
 app.get('/', (req, res) => res.send('OK'));
 
 app.get('/telegram', async (req, res) => {
   const userId = req.query.id || "0";
-  const isPremium = userId === "777000"; // ? change to your Telegram ID or after payment
+  const isPremium = PREMIUM_USERS.has(userId);
 
-  // Live BTC price
+  // Live price (your working code)
   let price = 91426, change = "+0.92";
   try {
     const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true");
@@ -33,17 +51,15 @@ app.get('/telegram', async (req, res) => {
   res.write(`<div style="font-size:2em;color:${color}">24h ${change >= 0 ? "+" : ""}${change}%</div>`);
   res.write("<canvas id='c'></canvas>");
 
-  // Whale box — blurred for free users
   res.write(`<div style="background:#001a00;padding:20px;border:3px solid #0f0;border-radius:20px;margin:20px;font-size:1.5em${isPremium?'':' class=\"blur\"'}">${lastWhale}</div>`);
 
   res.write("<div style='font-size:1.7em;color:#0f9'>AI TRACKER Next pump in 4h 21m • Target: $112,000+</div>");
 
   if (!isPremium) {
-    // TWO PAYMENT BUTTONS
     res.write("<div class='btn' onclick=\"location.href='https://t.me/CryptoBot?start=pay_12345_@crypto_alert_677_bot'\">Pay with Crypto (USDT/BTC/TON)</div>");
     res.write("<div class='btn' onclick=\"stripe.redirectToCheckout({lineItems:[{price:'prod_TYMpSYYnpnP7EI',quantity:1}],mode:'subscription',successUrl:location.href+'?id=777000',cancelUrl:location.href})\">Pay with Card / PayPal / Apple Pay</div>");
   } else {
-    res.write("<div style='color:#0f9;font-size:2em'>PREMIUM ACTIVE</div>");
+    res.write("<div style='color:#0f9;font-size:2em'>PREMIUM ACTIVE — Push alerts ON</div>");
   }
 
   res.write("<script>const stripe=Stripe('pk_live_51SZvppGrBtr1rroCdgmOZhNQJJyBFGbYUM3XoflqogoL7ujZU122Dj77skxfOXKewdo3vF8C7a92WmDoshPBXt8100QUAxED7q');</script>");
