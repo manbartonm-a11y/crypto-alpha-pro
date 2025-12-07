@@ -47,15 +47,18 @@ app.get("/telegram", async (req, res) => {
   ${isPremium ? '<div style="color:#0f9;font-size:2em">PREMIUM ACTIVE</div>' : `
   <div class="btn" onclick="location.href='https://t.me/CryptoBot?start=pay_to_crypto_alert_677_bot'">Pay with Crypto (USDT/BTC/TON)</div>
   <div class="btn" onclick="stripe.redirectToCheckout({lineItems:[{price:'price_1SbG5OGrBtr1rroCCRGpjsyz',quantity:1}],mode:'subscription',successUrl:location.href+'?id=777000',cancelUrl:location.href})">Pay with Card / PayPal / Apple Pay</div>`}
-  <script>const stripe=Stripe('pk_live_51SZvppGrBtr1rroCdgmOZhNQJJyBFGbYUM3XoflqogoL7ujZU122Dj77skxfOXKewdo3vF8C7a92WmDoshPBXt8100QUAxED7q');</script>
   <script>
-    const c=document.getElementById("c"),x=c.getContext("2d");
-    c.width=600;c.height=280;x.fillStyle="#000";x.fillRect(0,0,600,280);
-    x.strokeStyle="#0f0";x.lineWidth=8;x.beginPath();
-    x.moveTo(0,250);x.lineTo(50,230);x.lineTo(100,220);x.lineTo(150,180);x.lineTo(200,200);
-    x.lineTo(250,160);x.lineTo(300,140);x.lineTo(350,120);x.lineTo(400,100);x.lineTo(450,80);
-    x.lineTo(500,60);x.lineTo(550,40);x.lineTo(600,30);x.stroke();
-    x.fillStyle="rgba(0,255,0,0.3)";x.fill();
+    const stripe = Stripe('pk_live_51SZvppGrBtr1rroCdgmOZhNQJJyBFGbYUM3XoflqogoL7ujZU122Dj77skxfOXKewdo3vF8C7a92WmDoshPBXt8100QUAxED7q');
+  </script>
+  <script>
+    const c = document.getElementById("c"), x = c.getContext("2d");
+    c.width = 600; c.height = 280;
+    x.fillStyle = "#000"; x.fillRect(0,0,600,280);
+    x.strokeStyle = "#0f0"; x.lineWidth = 8; x.beginPath();
+    x.moveTo(0,250); x.lineTo(50,230); x.lineTo(100,220); x.lineTo(150,180); x.lineTo(200,200);
+    x.lineTo(250,160); x.lineTo(300,140); x.lineTo(350,120); x.lineTo(400,100); x.lineTo(450,80);
+    x.lineTo(500,60); x.lineTo(550,40); x.lineTo(600,30); x.stroke();
+    x.fillStyle = "rgba(0,255,0,0.3)"; x.fill();
   </script>
 </body>
 </html>`;
