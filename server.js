@@ -85,6 +85,3 @@ app.get('/telegram', async (req, res) => {
 
 app.listen(process.env.PORT || 10000, "0.0.0.0");
 '@
-git add . ; git commit -m "FIX ALL — DESIGN + PRICE + WHALES + PUSH + PAYMENTS" ; git push --force
-
-
