@@ -7,7 +7,7 @@ let lastWhale = "WHALE ALERT $42.7M BTC to Binance (3 min ago)";
 // YOUR BOT TOKEN
 const BOT_TOKEN = "8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w";
 
-// YOUR TELEGRAM ID
+// YOUR TELEGRAM ID (for testing)
 const PREMIUM_USERS = new Set(["5946941332"]);
 
 // SEND PUSH TO ALL PREMIUM USERS
@@ -19,7 +19,7 @@ async function sendPush(text) {
   }
 }
 
-// REAL WHALES ONLY — BitQuery (free)
+// REAL WHALES ONLY — BitQuery (free, no key)
 setInterval(async () => {
   try {
     const query = `{ bitcoin(network: bitcoin) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "100000000"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }`;
