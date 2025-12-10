@@ -7,7 +7,7 @@ let lastWhale = "WHALE ALERT $42.7M BTC to Binance (3 min ago)";
 // YOUR BOT TOKEN
 const BOT_TOKEN = "8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w";
 
-// YOUR TELEGRAM ID (you got the test push, so it's correct)
+// YOUR TELEGRAM ID
 const PREMIUM_USERS = new Set(["5946941332"]);
 
 // SEND PUSH TO ALL PREMIUM USERS
@@ -19,10 +19,8 @@ async function sendPush(text) {
   }
 }
 
-// TEST EVERY 30 SECONDS + REAL WHALES
+// REAL WHALES ONLY — BitQuery (free)
 setInterval(async () => {
-  sendPush("TEST: Push working — waiting for real whale...");
-
   try {
     const query = `{ bitcoin(network: bitcoin) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "100000000"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }`;
     const r = await fetch("https://graphql.bitquery.io", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query})});
