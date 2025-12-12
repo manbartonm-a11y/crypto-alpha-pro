@@ -47,7 +47,7 @@ app.get("/telegram", async (req, res) => {
   const priceStr = "$" + price.toLocaleString("en-US");
   const color = change >= 0 ? "#0f0" : "#f66";
 
-  const telegramChatId = userId === "0" ? "YOUR_ID_HERE" : userId; // for testing
+  const telegramChatId = userId === "0" ? "5946941332" : userId; // Your chat_id for testing
 
   const html = `
 <!DOCTYPE html>
@@ -77,8 +77,8 @@ app.get("/telegram", async (req, res) => {
   <!-- CRYPTO PAYMENT — SENDS YOUR CHAT ID -->
   <div class="btn" onclick="location.href='https://t.me/CryptoBot?start=pay_to_crypto_alert_677_bot_${telegramChatId}'">Pay with Crypto (USDT/BTC/TON)</div>
 
-  <!-- CARD PAYMENT — SENDS YOUR CHAT ID TO STRIPE -->
-  <div class="btn" onclick="location.href='https://buy.stripe.com/00wdR92NcfZzdNgahlgEg00?prefilled_email=&client_reference_id=${telegramChatId}'">Pay with Card / PayPal / Apple Pay</div>
+  <!-- TEST CARD PAYMENT — SENDS YOUR CHAT ID -->
+  <div class="btn" onclick="location.href='https://buy.stripe.com/test_bJe00j1Hc26L8bOfTX9Ve00?prefilled_email=&client_reference_id=${telegramChatId}'">Pay with Card / PayPal / Apple Pay</div>
   `}
 
   <script>
