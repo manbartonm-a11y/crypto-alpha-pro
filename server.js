@@ -3,36 +3,45 @@ const fetch = require("node-fetch");
 const app = express();
 app.use(express.json());
 
-// WEBHOOK — REPLIES TO /start (ADDED ON TOP, DOES NOT BREAK ANYTHING ELSE)
-app.post("/webhook", async (req, res) => {
+let lastWhale = "WHALE ALERT $42.7M BTC to Binance (3 min ago)";
+
+// YOUR BOT TOKEN
+const BOT_TOKEN = "8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w";
+
+// YOUR TELEGRAM ID (for testing)
+const PREMIUM_USERS = new Set(["5946941332"]);
+
+// SEND PUSH TO ALL PREMIUM USERS
+async function sendPush(text) {
+  for (const chatId of PREMIUM_USERS) {
+    try {
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`);
+    } catch(e) {}
+  }
+}
+
+// REAL WHALES — BitQuery (free, no key)
+setInterval(async () => {
   try {
-    const msg = req.body.message;
-    if (msg && msg.text && msg.text.trim() === "/start") {
-      const chatId = msg.chat.id;
-      await fetch(`https://api.telegram.org/bot8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: "Welcome to Crypto Alpha Pro! ??",
-          reply_markup: {
-            inline_keyboard: [[
-              { text: "Open Dashboard", web_app: { url: "https://crypto-alpha-pro.onrender.com/telegram" } }
-            ]]
-          }
-        })
-      });
+    const query = `{ bitcoin(network: bitcoin) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "100000000"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }`;
+    const r = await fetch("https://graphql.bitquery.io", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query})});
+    if (r.ok) {
+      const j = await r.json();
+      const t = j.data?.bitcoin?.transfers?.[0];
+      if (t) {
+        const btc = (t.amount / 1e8).toFixed(1);
+        const msg = `REAL WHALE ${btc} BTC (~$${Math.round(btc * 89000).toLocaleString()}M) just moved!`;
+        lastWhale = msg;
+        sendPush(msg);
+      }
     }
   } catch(e) {}
-  res.sendStatus(200);
-});
+}, 30000);
 
-// YOUR FULL WORKING DASHBOARD CODE (UNCHANGED)
 app.get("/", (req, res) => res.send("OK"));
 
 app.get("/telegram", async (req, res) => {
-  const userId = req.query.id || "0";
-  const isPremium = userId === "777000";
+  const isPremium = PREMIUM_USERS.has(req.query.id || "0");
 
   let price = 89600, change = "-2.84";
   try {
@@ -68,16 +77,16 @@ app.get("/telegram", async (req, res) => {
   <div class="p">${priceStr}</div>
   <div style="font-size:2em;color:${color}">24h ${change >= 0 ? "+" : ""}${change}%</div>
   <canvas id="c"></canvas>
-  <div style="background:#001a00;padding:20px;border:3px solid #0f0;border-radius:20px;margin:20px;font-size:1.5em${isPremium?'':' class=\"blur\"'}">WHALE ALERT $42.7M BTC to Binance (3 min ago)</div>
+  <div style="background:#001a00;padding:20px;border:3px solid #0f0;border-radius:20px;margin:20px;font-size:1.5em${isPremium?'':' class=\"blur\"'}">${lastWhale}</div>
   <div style="font-size:1.7em;color:#0f9">AI TRACKER Next pump in 4h 21m • Target: $112,000+</div>
-  ${isPremium ? '<div style="color:#0f9;font-size:2em">PREMIUM ACTIVE</div>' : `
+  ${isPremium ? '<div style="color:#0f9;font-size:2em">PREMIUM ACTIVE — Push alerts ON</div>' : `
   <div class="btn" onclick="location.href='https://t.me/CryptoBot?start=pay_to_crypto_alert_677_bot'">Pay with Crypto (USDT/BTC/TON)</div>
   <div class="btn" onclick="location.href='https://buy.stripe.com/00wdR92NcfZzdNgahlgEg00'">Pay with Card / PayPal / Apple Pay</div>`}
   <script>
     const c=document.getElementById("c"),x=c.getContext("2d");
     c.width=600;c.height=280;x.fillStyle="#000";x.fillRect(0,0,600,280);
     x.strokeStyle="#0f0";x.lineWidth=8;x.beginPath();
-    x.moveTo(0,250);x.lineTo(50,230);x.lineTo(100,220);x.lineTo(150,150,180);x.lineTo(200,200);
+    x.moveTo(0,250);x.lineTo(50,230);x.lineTo(100,220);x.lineTo(150,180);x.lineTo(200,200);
     x.lineTo(250,160);x.lineTo(300,140);x.lineTo(350,120);x.lineTo(400,100);x.lineTo(450,80);
     x.lineTo(500,60);x.lineTo(550,40);x.lineTo(600,30);x.stroke();
     x.fillStyle="rgba(0,255,0,0.3)";x.fill();
