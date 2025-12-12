@@ -1,39 +1,44 @@
-const express = require("express");
-const fetch = require("node-fetch");
+const express = require('express');
+const fetch = require('node-fetch');
 const app = express();
-app.use(express.json());
 
-// YOUR BOT TOKEN
-const BOT_TOKEN = "8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w";
+app.get('/', (req, res) => res.send('OK'));
 
-// WEBHOOK — Telegram sends updates here
-app.post("/webhook", async (req, res) => {
-  const update = req.body;
-  if (update.message && update.message.text === "/start") {
-    const chatId = update.message.chat.id;
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: "Welcome to Crypto Alpha Pro! ??\nClick below to open the dashboard:",
-        reply_markup: {
-          inline_keyboard: [[{
-            text: "Open Dashboard",
-            web_app: { url: "https://crypto-alpha-pro.onrender.com/telegram" }
-          }]]
-        }
-      })
-    });
+app.get('/telegram', async (req, res) => {
+  const userId = req.query.id || "0";
+  const isPremium = userId === "777000";
+
+  let price = 89600, change = "-2.84";
+  try {
+    const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true");
+    if (r.ok) {
+      const j = await r.json();
+      price = Math.round(j.bitcoin.usd);
+      change = j.bitcoin.usd_24h_change.toFixed(2);
+    }
+  } catch(e) {}
+
+  const priceStr = "$" + price.toLocaleString("en-US");
+  const color = change >= 0 ? "#0f0" : "#f66";
+
+  let html = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Crypto Alpha Pro</title>';
+  html += '<style>body{margin:0;background:#000;color:#0f0;font-family:monospace;text-align:center;padding:20px}h1{color:#0ff;font-size:3.5em}.p{font-size:5.5em;color:#0f9;margin:10px}canvas{width:95%;max-width:600px;height:280px;border:6px solid #0f0;border-radius:20px;margin:30px auto;background:#000}.blur{filter:blur(12px);pointer-events:none}.btn{background:#0f0;color:#000;padding:20px 40px;font-size:2em;border-radius:20px;cursor:pointer;margin:15px auto;width:90%;max-width:500px}</style>';
+  html += '<script src="https://js.stripe.com/v3/"></script></head><body>';
+  html += '<h1>CRYPTO ALPHA PRO</h1>';
+  html += '<div class="p">' + priceStr + '</div>';
+  html += '<div style="font-size:2em;color:' + color + '">24h ' + (change >= 0 ? '+' : '') + change + '%</div>';
+  html += '<canvas id="c"></canvas>';
+  html += '<div style="background:#001a00;padding:20px;border:3px solid #0f0;border-radius:20px;margin:20px;font-size:1.5em' + (isPremium ? '' : ' class="blur"') + '">WHALE ALERT $42.7M BTC to Binance (3 min ago)</div>';
+  html += '<div style="font-size:1.7em;color:#0f9">AI TRACKER Next pump in 4h 21m • Target: $112,000+</div>';
+  if (isPremium) {
+    html += '<div style="color:#0f9;font-size:2em">PREMIUM ACTIVE</div>';
+  } else {
+    html += '<div class="btn" onclick="location.href=\'https://t.me/CryptoBot?start=pay_to_crypto_alert_677_bot\'">Pay with Crypto (USDT/BTC/TON)</div>';
+    html += '<div class="btn" onclick="location.href=\'https://buy.stripe.com/00wdR92NcfZzdNgahlgEg00\'">Pay with Card / PayPal / Apple Pay</div>';
   }
-  res.sendStatus(200);
-});
+  html += '<script>const c=document.getElementById("c"),x=c.getContext("2d");c.width=600;c.height=280;x.fillStyle="#000";x.fillRect(0,0,600,280);x.strokeStyle="#0f0";x.lineWidth=8;x.beginPath();x.moveTo(0,250);x.lineTo(50,230);x.lineTo(100,220);x.lineTo(150,180);x.lineTo(200,200);x.lineTo(250,160);x.lineTo(300,140);x.lineTo(350,120);x.lineTo(400,100);x.lineTo(450,80);x.lineTo(500,60);x.lineTo(550,40);x.lineTo(600,30);x.stroke();x.fillStyle="rgba(0,255,0,0.3)";x.fill();</script></body></html>';
 
-// your existing dashboard code (keep everything below)
-app.get("/", (req, res) => res.send("OK"));
-
-app.get("/telegram", async (req, res) => {
-  // ... your full dashboard code here (price, whale, payments, etc.) ...
+  res.send(html);
 });
 
 app.listen(process.env.PORT || 10000, "0.0.0.0");
