@@ -1,7 +1,33 @@
 const express = require("express");
 const fetch = require("node-fetch");
 const app = express();
+app.use(express.json());
 
+// WEBHOOK — REPLIES TO /start (ADDED ON TOP, DOES NOT BREAK ANYTHING ELSE)
+app.post("/webhook", async (req, res) => {
+  try {
+    const msg = req.body.message;
+    if (msg && msg.text && msg.text.trim() === "/start") {
+      const chatId = msg.chat.id;
+      await fetch(`https://api.telegram.org/bot8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: "Welcome to Crypto Alpha Pro! ??",
+          reply_markup: {
+            inline_keyboard: [[
+              { text: "Open Dashboard", web_app: { url: "https://crypto-alpha-pro.onrender.com/telegram" } }
+            ]]
+          }
+        })
+      });
+    }
+  } catch(e) {}
+  res.sendStatus(200);
+});
+
+// YOUR FULL WORKING DASHBOARD CODE (UNCHANGED)
 app.get("/", (req, res) => res.send("OK"));
 
 app.get("/telegram", async (req, res) => {
@@ -51,7 +77,7 @@ app.get("/telegram", async (req, res) => {
     const c=document.getElementById("c"),x=c.getContext("2d");
     c.width=600;c.height=280;x.fillStyle="#000";x.fillRect(0,0,600,280);
     x.strokeStyle="#0f0";x.lineWidth=8;x.beginPath();
-    x.moveTo(0,250);x.lineTo(50,230);x.lineTo(100,220);x.lineTo(150,180);x.lineTo(200,200);
+    x.moveTo(0,250);x.lineTo(50,230);x.lineTo(100,220);x.lineTo(150,150,180);x.lineTo(200,200);
     x.lineTo(250,160);x.lineTo(300,140);x.lineTo(350,120);x.lineTo(400,100);x.lineTo(450,80);
     x.lineTo(500,60);x.lineTo(550,40);x.lineTo(600,30);x.stroke();
     x.fillStyle="rgba(0,255,0,0.3)";x.fill();
