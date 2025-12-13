@@ -11,20 +11,13 @@ const PREMIUM_USERS = new Set();
 // AUTO-UNLOCK AFTER PAYMENT (Stripe + CryptoBot)
 app.post("/unlock", async (req, res) => {
   let userId = null;
-
-  // Stripe
   if (req.body?.data?.object?.metadata?.telegram_id) {
     userId = req.body.data.object.metadata.telegram_id;
   }
-  // CryptoBot
   else if (req.body?.telegram_id) {
     userId = req.body.telegram_id;
   }
-
-  if (userId) {
-    PREMIUM_USERS.add(userId);
-    console.log("PREMIUM UNLOCKED FOR:", userId);
-  }
+  if (userId) PREMIUM_USERS.add(userId);
   res.sendStatus(200);
 });
 
@@ -47,7 +40,7 @@ app.get("/telegram", async (req, res) => {
   const priceStr = "$" + price.toLocaleString("en-US");
   const color = change >= 0 ? "#0f0" : "#f66";
 
-  const telegramChatId = userId === "0" ? "5946941332" : userId; // Your chat_id for testing
+  const telegramChatId = userId === "0" ? "5946941332" : userId;
 
   const html = `
 <!DOCTYPE html>
@@ -74,12 +67,8 @@ app.get("/telegram", async (req, res) => {
   <div style="font-size:1.7em;color:#0f9">AI TRACKER Next pump in 4h 21m • Target: $112,000+</div>
 
   ${isPremium ? '<div style="color:#0f9;font-size:2em">PREMIUM ACTIVE — Push alerts ON</div>' : `
-  <!-- CRYPTO PAYMENT — SENDS YOUR CHAT ID -->
   <div class="btn" onclick="location.href='https://t.me/CryptoBot?start=pay_to_crypto_alert_677_bot_${telegramChatId}'">Pay with Crypto (USDT/BTC/TON)</div>
-
-  <!-- TEST CARD PAYMENT — SENDS YOUR CHAT ID -->
-  <div class="btn" onclick="location.href='https://buy.stripe.com/test_bJe00j1Hc26L8bOfTX9Ve00?prefilled_email=&client_reference_id=${telegramChatId}'">Pay with Card / PayPal / Apple Pay</div>
-  `}
+  <div class="btn" onclick="location.href='https://buy.stripe.com/00wdR92NcfZzdNgahlgEg00?client_reference_id=${telegramChatId}'">Pay with Card / PayPal / Apple Pay</div>`}
 
   <script>
     const c=document.getElementById("c"),x=c.getContext("2d");
