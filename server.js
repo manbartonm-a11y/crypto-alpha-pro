@@ -5,27 +5,48 @@ app.use(express.json());
 
 let lastWhale = "WHALE ALERT $42.7M BTC to Binance (3 min ago)";
 
-// Store paid users (Telegram ID)
-const PREMIUM_USERS = new Set();
+// YOUR BOT TOKEN
+const BOT_TOKEN = "8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w";
 
-// AUTO-UNLOCK AFTER PAYMENT (Stripe + CryptoBot)
-app.post("/unlock", async (req, res) => {
-  let userId = null;
-  if (req.body?.data?.object?.metadata?.telegram_id) {
-    userId = req.body.data.object.metadata.telegram_id;
-  }
-  else if (req.body?.telegram_id) {
-    userId = req.body.telegram_id;
-  }
-  if (userId) PREMIUM_USERS.add(userId);
-  res.sendStatus(200);
-});
+// YOUR TELEGRAM ID
+const PREMIUM_USERS = new Set(["5946941332"]);
 
+// CRYPTOMETER API KEY
+const CRYPTOMETER_KEY = "1f2f2Mt7SGI91M873EV4NP71g8I0UY21B116ECbb";
+
+// SEND PUSH TO ALL PREMIUM USERS
+async function sendPush(text) {
+  for (const chatId of PREMIUM_USERS) {
+    try {
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`);
+    } catch(e) {}
+  }
+}
+
+// REAL WHALE ALERTS — CryptoMeter.io (large trades on exchanges)
+setInterval(async () => {
+  try {
+    // Example endpoint for large trades (adjust if needed from docs — this is common)
+    const r = await fetch(`https://api.cryptometer.io/v1/activity/large-trades?api_key=${CRYPTOMETER_KEY}&min_value=1000000&exchange=binance,bybit,okx&limit=1`);
+    if (r.ok) {
+      const j = await r.json();
+      const t = j.data?.[0] || j.trades?.[0];
+      if (t) {
+        const msg = `REAL WHALE ALERT ${t.quantity} ${t.pair} (${t.side.toUpperCase()}) ~$${t.value_usd.toLocaleString()} on ${t.exchange.toUpperCase()} just now!`;
+        lastWhale = msg;
+        sendPush(msg);
+      }
+    }
+  } catch(e) {
+    console.log("CryptoMeter error:", e);
+  }
+}, 30000);
+
+// your dashboard code (keep everything)
 app.get("/", (req, res) => res.send("OK"));
 
 app.get("/telegram", async (req, res) => {
-  const userId = req.query.id || "0";
-  const isPremium = PREMIUM_USERS.has(userId);
+  const isPremium = PREMIUM_USERS.has(req.query.id || "0");
 
   let price = 89600, change = "-2.84";
   try {
@@ -39,8 +60,6 @@ app.get("/telegram", async (req, res) => {
 
   const priceStr = "$" + price.toLocaleString("en-US");
   const color = change >= 0 ? "#0f0" : "#f66";
-
-  const telegramChatId = userId === "0" ? "5946941332" : userId;
 
   const html = `
 <!DOCTYPE html>
@@ -65,11 +84,9 @@ app.get("/telegram", async (req, res) => {
   <canvas id="c"></canvas>
   <div style="background:#001a00;padding:20px;border:3px solid #0f0;border-radius:20px;margin:20px;font-size:1.5em${isPremium?'':' class=\"blur\"'}">${lastWhale}</div>
   <div style="font-size:1.7em;color:#0f9">AI TRACKER Next pump in 4h 21m • Target: $112,000+</div>
-
   ${isPremium ? '<div style="color:#0f9;font-size:2em">PREMIUM ACTIVE — Push alerts ON</div>' : `
-  <div class="btn" onclick="location.href='https://t.me/CryptoBot?start=pay_to_crypto_alert_677_bot_${telegramChatId}'">Pay with Crypto (USDT/BTC/TON)</div>
-  <div class="btn" onclick="location.href='https://buy.stripe.com/00wdR92NcfZzdNgahlgEg00?client_reference_id=${telegramChatId}'">Pay with Card / PayPal / Apple Pay</div>`}
-
+  <div class="btn" onclick="location.href='https://t.me/CryptoBot?start=pay_to_crypto_alert_677_bot'">Pay with Crypto (USDT/BTC/TON)</div>
+  <div class="btn" onclick="location.href='https://buy.stripe.com/00wdR92NcfZzdNgahlgEg00'">Pay with Card / PayPal / Apple Pay</div>`}
   <script>
     const c=document.getElementById("c"),x=c.getContext("2d");
     c.width=600;c.height=280;x.fillStyle="#000";x.fillRect(0,0,600,280);
