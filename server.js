@@ -8,11 +8,8 @@ let lastWhale = "WHALE ALERT $42.7M BTC to Binance (3 min ago)";
 // YOUR BOT TOKEN
 const BOT_TOKEN = "8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w";
 
-// YOUR TELEGRAM ID
+// YOUR TELEGRAM ID (you got test DMs, so it's correct)
 const PREMIUM_USERS = new Set(["5946941332"]);
-
-// CRYPTOMETER API KEY
-const CRYPTOMETER_KEY = "1f2f2Mt7SGI91M873EV4NP71g8I0UY21B116ECbb";
 
 // SEND PUSH TO ALL PREMIUM USERS
 async function sendPush(text) {
@@ -23,26 +20,22 @@ async function sendPush(text) {
   }
 }
 
-// REAL WHALE ALERTS — CryptoMeter.io (large trades on exchanges)
+// REAL WHALES — CryptoMeter.io (your key)
 setInterval(async () => {
   try {
-    // Example endpoint for large trades (adjust if needed from docs — this is common)
-    const r = await fetch(`https://api.cryptometer.io/v1/activity/large-trades?api_key=${CRYPTOMETER_KEY}&min_value=1000000&exchange=binance,bybit,okx&limit=1`);
+    const r = await fetch("https://api.cryptometer.io/v1/activity/large-trades?api_key=1f2f2Mt7SGI91M873EV4NP71g8I0UY21B116ECbb&min_value=1000000&exchange=binance,bybit&limit=1");
     if (r.ok) {
       const j = await r.json();
-      const t = j.data?.[0] || j.trades?.[0];
+      const t = j.data?.[0];
       if (t) {
-        const msg = `REAL WHALE ALERT ${t.quantity} ${t.pair} (${t.side.toUpperCase()}) ~$${t.value_usd.toLocaleString()} on ${t.exchange.toUpperCase()} just now!`;
+        const msg = `REAL WHALE ALERT $${t.value_usd.toLocaleString()} ${t.pair} ${t.side.toUpperCase()} on ${t.exchange.toUpperCase()} just now!`;
         lastWhale = msg;
         sendPush(msg);
       }
     }
-  } catch(e) {
-    console.log("CryptoMeter error:", e);
-  }
+  } catch(e) {}
 }, 30000);
 
-// your dashboard code (keep everything)
 app.get("/", (req, res) => res.send("OK"));
 
 app.get("/telegram", async (req, res) => {
