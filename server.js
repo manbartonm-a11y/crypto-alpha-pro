@@ -1,43 +1,76 @@
-const express = require("express");
-const fetch = require("node-fetch");
+const express = require('express');
+const fetch = require('node-fetch');
 const app = express();
 app.use(express.json());
 
-let lastWhale = "WHALE ALERT $42.7M BTC to Binance (3 min ago)";
+let lastWhale = 'WHALE ALERT $42.7M BTC to Binance (3 min ago)';
 
 // YOUR BOT TOKEN
-const BOT_TOKEN = "8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w";
+const BOT_TOKEN = '8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w';
 
-// YOUR TELEGRAM ID
+// Store paid users (dynamic)
 const PREMIUM_USERS = new Set(["5946941332"]);
-
-// YOUR CRYPTOMETER KEY
-const CRYPTOMETER_KEY = "1f2f2Mt7SGI91M873EV4NP71g8I0UY21B116ECbb";
 
 // SEND PUSH TO ALL PREMIUM USERS
 async function sendPush(text) {
   for (const chatId of PREMIUM_USERS) {
     try {
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`);
-    } catch(e) {}
+      await fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + chatId + '&text=' + encodeURIComponent(text));
+      console.log("DM sent to:", chatId);
+    } catch(e) {
+      console.log("Push error:", e);
+    }
   }
 }
 
-// REAL WHALES — CryptoMeter.io large trades (your key)
+// REAL WHALES — BitQuery (free, no key, BTC/ETH/SOL)
 setInterval(async () => {
   try {
-    const r = await fetch(`https://api.cryptometer.io/v1/activity/large-trades?api_key=${CRYPTOMETER_KEY}&min_value=1000000&exchange=binance,bybit,okx&limit=1`);
+    // BTC whale
+    let query = '{ bitcoin(network: bitcoin) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "50000000"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }';
+    let r = await fetch("https://graphql.bitquery.io", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query})});
     if (r.ok) {
-      const j = await r.json();
-      const t = j.data?.[0] || j.trades?.[0];
+      let j = await r.json();
+      let t = j.data?.bitcoin?.transfers?.[0];
       if (t) {
-        const msg = `REAL WHALE ALERT $${t.value_usd.toLocaleString()} ${t.pair} ${t.side.toUpperCase()} on ${t.exchange.toUpperCase()} just now!`;
+        let btc = (t.amount / 1e8).toFixed(1);
+        let msg = `REAL WHALE ALERT ${btc} BTC (~$${Math.round(btc * 89600).toLocaleString()}M) just now!`;
+        lastWhale = msg;
+        sendPush(msg);
+        return; // Stop if BTC found
+      }
+    }
+
+    // ETH whale (fallback)
+    query = '{ ethereum(network: ethereum) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "1000"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }';
+    r = await fetch("https://graphql.bitquery.io", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query})});
+    if (r.ok) {
+      let j = await r.json();
+      let t = j.data?.ethereum?.transfers?.[0];
+      if (t) {
+        let eth = t.amount.toFixed(1);
+        let msg = `REAL WHALE ALERT ${eth} ETH (~$${Math.round(eth * 3000).toLocaleString()}M) just now!`;
+        lastWhale = msg;
+        sendPush(msg);
+        return;
+      }
+    }
+
+    // SOL whale (fallback)
+    query = '{ solana(network: solana) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "10000"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }';
+    r = await fetch("https://graphql.bitquery.io", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query})});
+    if (r.ok) {
+      let j = await r.json();
+      let t = j.data?.solana?.transfers?.[0];
+      if (t) {
+        let sol = t.amount.toFixed(1);
+        let msg = `REAL WHALE ALERT ${sol} SOL (~$${Math.round(sol * 150).toLocaleString()}M) just now!`;
         lastWhale = msg;
         sendPush(msg);
       }
     }
   } catch(e) {
-    console.log("CryptoMeter error:", e);
+    console.log("Whale API error:", e);
   }
 }, 30000);
 
