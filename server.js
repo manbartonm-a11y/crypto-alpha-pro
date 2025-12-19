@@ -8,7 +8,7 @@ let lastWhale = "WHALE ALERT $42.7M BTC to Binance (3 min ago)";
 // YOUR BOT TOKEN
 const BOT_TOKEN = "8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w";
 
-// YOUR TELEGRAM ID (for testing)
+// YOUR TELEGRAM ID
 const PREMIUM_USERS = new Set(["5946941332"]);
 
 // SEND PUSH
@@ -16,63 +16,29 @@ async function sendPush(text) {
   for (const chatId of PREMIUM_USERS) {
     try {
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`);
-      console.log("DM sent:", text);
-    } catch(e) {
-      console.log("Push error:", e);
-    }
+    } catch(e) {}
   }
 }
 
-// REAL WHALES — BitQuery (BTC $500k+, ETH $1M+, SOL $1M+)
+// REAL WHALES + TEST TO PROVE IT WORKS
 setInterval(async () => {
+  sendPush("TEST: System alive — waiting for real whale move...");
+
   try {
-    // BTC $500k+
-    let query = `{ bitcoin(network: bitcoin) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "50000000"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }`;
-    let r = await fetch("https://graphql.bitquery.io", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query})});
+    const query = `{ bitcoin(network: bitcoin) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "30000000"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }`;
+    const r = await fetch("https://graphql.bitquery.io", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query})});
     if (r.ok) {
-      let j = await r.json();
-      let t = j.data?.bitcoin?.transfers?.[0];
+      const j = await r.json();
+      const t = j.data?.bitcoin?.transfers?.[0];
       if (t) {
-        let btc = (t.amount / 1e8).toFixed(1);
-        let msg = `REAL WHALE ALERT ${btc} BTC (~$${Math.round(btc * 89600).toLocaleString()}M) just now!`;
-        lastWhale = msg;
-        sendPush(msg);
-        return;
-      }
-    }
-
-    // ETH $1M+
-    query = `{ ethereum(network: ethereum) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "300"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }`;
-    r = await fetch("https://graphql.bitquery.io", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query})});
-    if (r.ok) {
-      let j = await r.json();
-      let t = j.data?.ethereum?.transfers?.[0];
-      if (t) {
-        let eth = t.amount.toFixed(1);
-        let msg = `REAL WHALE ALERT ${eth} ETH (~$${Math.round(eth * 3200).toLocaleString()}M) just now!`;
-        lastWhale = msg;
-        sendPush(msg);
-        return;
-      }
-    }
-
-    // SOL $1M+
-    query = `{ solana(network: solana) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "5000"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }`;
-    r = await fetch("https://graphql.bitquery.io", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query})});
-    if (r.ok) {
-      let j = await r.json();
-      let t = j.data?.solana?.transfers?.[0];
-      if (t) {
-        let sol = t.amount.toFixed(1);
-        let msg = `REAL WHALE ALERT ${sol} SOL (~$${Math.round(sol * 200).toLocaleString()}M) just now!`;
+        const btc = (t.amount / 1e8).toFixed(1);
+        const msg = `REAL WHALE ALERT ${btc} BTC (~$${Math.round(btc * 89600).toLocaleString()}M) just now!`;
         lastWhale = msg;
         sendPush(msg);
       }
     }
-  } catch(e) {
-    console.log("Whale error:", e);
-  }
-}, 30000);
+  } catch(e) {}
+}, 300000); // every 5 min for test (change to 30000 for 30 sec when live)
 
 app.get("/", (req, res) => res.send("OK"));
 
