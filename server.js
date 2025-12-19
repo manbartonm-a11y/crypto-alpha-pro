@@ -11,6 +11,9 @@ const BOT_TOKEN = "8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w";
 // YOUR TELEGRAM ID
 const PREMIUM_USERS = new Set(["5946941332"]);
 
+// YOUR CRYPTOMETER KEY (fallback)
+const CRYPTOMETER_KEY = "1f2f2Mt7SGI91M873EV4NP71g8I0UY21B116ECbb";
+
 // SEND PUSH TO ALL PREMIUM USERS
 async function sendPush(text) {
   for (const chatId of PREMIUM_USERS) {
@@ -23,14 +26,14 @@ async function sendPush(text) {
   }
 }
 
-// REAL WHALES — BitQuery (primary) + Whale Alert RSS (fallback)
+// REAL WHALES — BitQuery (primary) + CryptoMeter (fallback)
 setInterval(async () => {
-  console.log("Running whale check...");
+  console.log("Checking for whales...");
   let found = false;
 
   try {
-    // BitQuery BTC $200k+
-    let query = `{ bitcoin(network: bitcoin) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "20000000"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }`;
+    // BitQuery BTC $100k+
+    let query = `{ bitcoin(network: bitcoin) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "10000000"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }`;
     let r = await fetch("https://graphql.bitquery.io", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query})});
     if (r.ok) {
       let j = await r.json();
@@ -50,27 +53,26 @@ setInterval(async () => {
 
   if (!found) {
     try {
-      // Whale Alert RSS fallback ($200k+)
-      let r = await fetch("https://api.whale-alert.io/feed.rss?min_value=200000");
+      // CryptoMeter fallback ($100k+ on exchanges)
+      let r = await fetch(`https://api.cryptometer.io/v1/activity/large-trades?api_key=${CRYPTOMETER_KEY}&min_value=100000&exchange=binance,bybit,okx&limit=1`);
       if (r.ok) {
-        let xml = await r.text();
-        // Simple XML parse (add xml2js if needed, but for simple, use string parse)
-        let match = xml.match(/<item> <title>(.*?)<\/title>/);
-        if (match) {
-          let msg = `REAL WHALE ALERT ${match[1]} just now!`;
+        let j = await r.json();
+        let t = j.data?.[0];
+        if (t) {
+          let msg = `REAL WHALE ALERT $${t.value_usd.toLocaleString()} ${t.pair} ${t.side.toUpperCase()} on ${t.exchange.toUpperCase()} just now!`;
           lastWhale = msg;
           sendPush(msg);
           found = true;
-          console.log("Whale Alert fallback whale found");
+          console.log("CryptoMeter whale found");
         }
       }
     } catch(e) {
-      console.log("Whale Alert fallback error:", e);
+      console.log("CryptoMeter error:", e);
     }
   }
 
   if (!found) {
-    console.log("No whale found this cycle");
+    console.log("No whale this cycle");
   }
 }, 30000);
 
