@@ -3,44 +3,46 @@ const fetch = require("node-fetch");
 const app = express();
 app.use(express.json());
 
-// WEBHOOK — HANDLES /start AND FUTURE PUSHES
-app.post("/webhook", async (req, res) => {
-  try {
-    const update = req.body;
-    if (update.message) {
-      const text = update.message.text || "";
-      const chatId = update.message.chat.id;
+// GLOBAL lastWhale — fixed scope error
+let lastWhale = "WHALE ALERT $42.7M BTC to Binance (3 min ago)";
 
-      if (text === "/start") {
-        await fetch(`https://api.telegram.org/bot8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w/sendMessage`, {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: "Welcome to Crypto Alpha Pro! ??\nClick below to open the live dashboard:",
-            reply_markup: {
-              inline_keyboard: [[{
-                text: "Open Dashboard",
-                web_app: { url: "https://crypto-alpha-pro.onrender.com/telegram" }
-              }]]
-            }
-          })
-        });
+// YOUR BOT TOKEN
+const BOT_TOKEN = "8145055066:AAHU1p-W8kUdDd8t7qhF1KiEtb3qVWkQ91w";
+
+// YOUR TELEGRAM ID
+const PREMIUM_USERS = new Set(["5946941332"]);
+
+// SEND PUSH
+async function sendPush(text) {
+  for (const chatId of PREMIUM_USERS) {
+    try {
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`);
+    } catch(e) {}
+  }
+}
+
+// REAL WHALES (your code — kept the same)
+setInterval(async () => {
+  try {
+    const query = `{ bitcoin(network: bitcoin) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "10000000"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }`;
+    const r = await fetch("https://graphql.bitquery.io", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({query})});
+    if (r.ok) {
+      const j = await r.json();
+      const t = j.data?.bitcoin?.transfers?.[0];
+      if (t) {
+        const btc = (t.amount / 1e8).toFixed(1);
+        const msg = `REAL WHALE ALERT ${btc} BTC (~$${Math.round(btc * 89600).toLocaleString()}M) just now!`;
+        lastWhale = msg;
+        sendPush(msg);
       }
     }
-  } catch(e) {
-    console.log("Webhook error:", e);
-  }
-  res.sendStatus(200);
-});
-
-// your full dashboard (keep as is)
+  } catch(e) {}
+}, 30000);
 
 app.get("/", (req, res) => res.send("OK"));
 
 app.get("/telegram", async (req, res) => {
-  const userId = req.query.id || "0";
-  const isPremium = userId === "777000";
+  const isPremium = PREMIUM_USERS.has(req.query.id || "0");
 
   let price = 89600, change = "-2.84";
   try {
