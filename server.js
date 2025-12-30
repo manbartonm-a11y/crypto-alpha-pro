@@ -3,7 +3,7 @@ const fetch = require("node-fetch");
 const app = express();
 app.use(express.json());
 
-// GLOBAL lastWhale — fixed scope error
+// GLOBAL lastWhale — fixed scope
 let lastWhale = "WHALE ALERT $42.7M BTC to Binance (3 min ago)";
 
 // YOUR BOT TOKEN
@@ -21,7 +21,7 @@ async function sendPush(text) {
   }
 }
 
-// REAL WHALES (your code — kept the same)
+// REAL WHALES (your code — kept)
 setInterval(async () => {
   try {
     const query = `{ bitcoin(network: bitcoin) { transfers(options: {limit: 1, desc: "block.height"}, amount: {gt: "10000000"}) { amount receiver { address } sender { address } block { timestamp { time } } } } }`;
